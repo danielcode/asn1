@@ -1,0 +1,8 @@
+.autotest
+History.txt
+Manifest.txt
+README.txt
+Rakefile
+bin/ruby/asn1
+lib/ruby/asn1.rb
+test/test_ruby/asn1.rb
