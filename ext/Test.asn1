@@ -1,0 +1,29 @@
+TestModel DEFINITIONS ::= BEGIN -- Module parameters preamble
+  TestType ::= INTEGER
+  Test2Type ::= TestType
+
+  TestSequence ::= SEQUENCE {
+    str     UTF8String,
+    testVar TestType
+  }
+
+  TestSequenceOf ::= SEQUENCE OF TestSequence
+
+  TestSet ::= SET {
+    testSequence TestSequence,
+    num          Test2Type
+  }
+
+  TestSetOf ::= SET OF TestSequence
+
+  AnonSequence ::= SEQUENCE {
+    sequence1 SEQUENCE {
+      sequence2 SEQUENCE {
+        sequence3 TestSequence,
+        level3 INTEGER
+      },
+      level2 TestType
+    },
+    level1 Test2Type
+  }
+END

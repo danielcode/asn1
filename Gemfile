@@ -1,0 +1,5 @@
+source 'https://rubygems.org'
+gem 'axiom',               :git => 'https://github.com/dkubb/axiom.git'
+# gem 'sql',                 :git => 'https://github.com/dkubb/sql.git'
+gem 'axiom-sql-generator', :git => 'https://github.com/dkubb/axiom-sql-generator.git'
+gem 'axiom-do-adapter',    :git => 'https://github.com/dkubb/axiom-do-adapter.git'
