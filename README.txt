@@ -1,6 +1,6 @@
-= ruby-asn1
+= asn1
 
-* FIX (url)
+* http://github.com/
 
 == DESCRIPTION:
 

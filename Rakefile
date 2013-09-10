@@ -1,6 +1,5 @@
-# -*- ruby -*-
-
 require "rubygems"
+require 'rake/extensiontask'
 require "hoe"
 
 # Hoe.plugin :compiler
@@ -13,16 +12,15 @@ require "hoe"
 # Hoe.plugin :rcov
 # Hoe.plugin :rubyforge
 
-Hoe.spec "ruby-asn1" do
-  # HEY! If you fill these out in ~/.hoe_template/Rakefile.erb then
-  # you'll never have to touch them again!
-  # (delete this comment too, of course)
+Hoe.spec "asn1" do
+  developer("Daniel", "srcdaniel@gmail.com")
 
-  # developer("FIX", "FIX@example.com")
+  self.extra_dev_deps << ['rake-compiler', '>= 0']
+  self.spec_extras = { :extensions => ["ext/asn1/extconf.rb"] }
 
-  # self.group_name = "ruby-asn1x" # if part of an organization/group
+  license "MIT" # this should match the license in the README
 
-  # license "MIT" # this should match the license in the README
+  Rake::ExtensionTask.new('asn1', spec) do |ext|
+    ext.lib_dir = File.join('lib', 'asn1')
+  end
 end
-
-# vim: syntax=ruby
