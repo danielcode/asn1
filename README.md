@@ -21,8 +21,30 @@ Building
 
 1. cd ext/asn1
 2. asn1c Test.asn1
+   * rm Makefile.am.sample
+   * rm converter-sample.c
 3. cd ../..
 4. rake compile
 5. rake install_gem
 
-Other instructions are ... absent for the moment.
+Using
+-------
+    $ irb
+    > encoded = Asn1::Integer.encode :ber, 1234567890
+    => "\x02\x04I\x96\x02\xD2"
+    > Asn1::Integer.decode :ber, encoded
+    => 1234567890
+
+    > encoded = Asn1::IA5String.encode :ber, 'Hello, world!'
+    => "\x16\rHello, world!"
+    > Asn1::IA5String.decode :ber, encoded
+    => "Hello, world!"
+
+Classes
+-------
+
+### Asn1
+
+#### Asn1::Integer
+
+#### Asn1::IA5String
