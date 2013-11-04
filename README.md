@@ -30,6 +30,8 @@ Building
 Using
 -------
     $ irb
+    > require 'asn1/asn1'
+    => true
     > encoded = Asn1::Integer.encode :ber, 1234567890
     => "\x02\x04I\x96\x02\xD2"
     > Asn1::Integer.decode :ber, encoded
