@@ -20,7 +20,7 @@ Building
 * asn1c must be in your path
 
 1. cd ext/asn1
-2. asn1c Test.asn1
+2. asn1c -fwide-types Test.asn1
    * rm Makefile.am.sample
    * rm converter-sample.c
 3. cd ../..

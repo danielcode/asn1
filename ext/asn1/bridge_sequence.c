@@ -44,13 +44,15 @@ VALUE
 encode_sequence(VALUE class, VALUE encoder, VALUE v)
 {
 	asn_TYPE_descriptor_t *td = NULL;
-	void *s	 	 = NULL;
-	char *tdName = NULL;
+	void *s			= NULL;
+	char *tdName	= NULL;
+	char *encoder_s	= NULL;
 
 	asn_enc_rval_t er;
 	bufferInfo_t   bi;
 	VALUE vTD;
     VALUE encoded;
+	VALUE symbol_as_string;
 
 	/*
 	 * 1. Find type descriptor associated with class
@@ -72,10 +74,26 @@ encode_sequence(VALUE class, VALUE encoder, VALUE v)
 	bi.offset = 0;
 	bi.length = 512;
 
-	er = td->der_encoder(td, s, 0, 0, (asn_app_consume_bytes_f *)consumeBytes, (void *)&bi);
-	if (er.encoded == -1)
+	symbol_as_string = rb_funcall(encoder, rb_intern("to_s"), 0, rb_ary_new2(0));
+    encoder_s = RSTRING_PTR(symbol_as_string);
+	if (strcmp(encoder_s, "der") == 0)
 	{
-		rb_raise(rb_eException, "Can't encode type");
+		er = td->der_encoder(td, s, 0, 0, (asn_app_consume_bytes_f *)consumeBytes, (void *)&bi);
+		if (er.encoded == -1)
+		{
+			rb_raise(rb_eException, "Can't encode type");
+		}
+	}
+	else if (strcmp(encoder_s, "per") == 0)
+	{
+	}
+	else if (strcmp(encoder_s, "xer") == 0)
+	{
+		xer_encode(td, s, XER_F_CANONICAL, (asn_app_consume_bytes_f *)consumeBytes, (void *)&bi);
+		if (er.encoded == -1)
+		{
+			rb_raise(rb_eException, "Can't encode type");
+		}
 	}
 
 	encoded = rb_str_new(bi.buffer, bi.offset);
@@ -253,6 +271,7 @@ asn1_enstruct_integer(VALUE v, asn_TYPE_member_t *member, void *container)
 {
 	int   result;
 	VALUE memb = rb_funcall(v, rb_intern(member->name), 0, rb_ary_new2(0));
+	long  val  = NUM2LONG(memb);
 
 	/*
 	if (!(Qtrue == rb_obj_is_kind_of(v, T_FIXNUM))) {
@@ -260,7 +279,7 @@ asn1_enstruct_integer(VALUE v, asn_TYPE_member_t *member, void *container)
 	}
 	*/
 
-	result = asn_long2INTEGER((INTEGER_t *)container, NUM2LONG(memb));
+	result = asn_long2INTEGER((INTEGER_t *)container, val);
 	/* if (result) Check result */
 
 	return Qnil;
