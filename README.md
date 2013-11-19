@@ -10,7 +10,7 @@ Demonstrated ability to encode:
 * INTEGER
 * SEQUENCE with IA5String and INTEGER
 
-Decoding of UTF8String and INTEGER works, but not SEQUENCEs.
+Decoding of UTF8String and INTEGER works, and sequence comprising INTEGER and IA5String.
 
 Requires modified version of asn1c, available here:
 https://github.com/danielcode/asn1c
@@ -29,6 +29,7 @@ Building
 
 Using
 -------
+### Integer
     $ irb
     > require 'asn1/asn1'
     => true
@@ -37,10 +38,31 @@ Using
     > Asn1::Integer.decode :ber, encoded
     => 1234567890
 
+### IA5String
     > encoded = Asn1::IA5String.encode :ber, 'Hello, world!'
     => "\x16\rHello, world!"
     > Asn1::IA5String.decode :ber, encoded
     => "Hello, world!"
+
+### Sample Sequence
+    > x = Asn1::Type::SimpleSequence.new
+    => #<Asn1::Type::SimpleSequence:0x00000801ca1b20>
+    > x.simpleString = "Hello, world!"
+    => "Hello, world!"
+    > x.simpleInt = 1
+    => 1
+    > y = Asn1::Schema::SimpleSequence.encode :der, x
+    => "0\x12\x02\x01\x01\x16\rHello, world!"
+    > Asn1::Schema::SimpleSequence.decode :der, y
+    => #<Asn1::Type::SimpleSequence:0x00000801c6b728 @simpleString="Hello, world!", @simpleInt=1>
+
+    > require 'base64'
+    => true
+    > puts Base64.encode64(y)
+    MBICAQEWDUhlbGxvLCB3b3JsZCE=
+
+Now, try decoding the base64 encoded string here: http://www.lapo.it/asn1js/
+
 
 Classes
 -------
