@@ -16,7 +16,8 @@ static VALUE asn1_test(VALUE mod)
 
 void Init_asn1()
 {
-	VALUE mAsn1, cAsn1, cSchema, cType;
+	VALUE mAsn1, mError, cAsn1, cSchema, cType;
+	VALUE cEncoderTypeError;
 	VALUE cInteger, cIA5String;
 	VALUE cNewType;
 
@@ -29,6 +30,12 @@ void Init_asn1()
 	cAsn1 = rb_define_class_under(mAsn1, "Asn1", rb_cObject);
 	rb_define_singleton_method(cAsn1, "traverse_type",  traverse_type, 1);
 	rb_define_singleton_method(cAsn1, "define_classes", define_type, 2);
+
+	/* ************************************************************************** */
+	/* Errors         															  */
+	/* ************************************************************************** */
+	mError			  = rb_define_module_under(mAsn1, "Error");
+	cEncoderTypeError = rb_define_class_under(mError, "EncoderTypeError", rb_eStandardError);
 
 	/* ************************************************************************** */
 	/* Schemas 																	  */

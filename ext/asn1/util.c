@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <dlfcn.h>	/* For dlopen, etc. */
 #include <ruby.h>
 
@@ -15,11 +16,13 @@ VALUE   _traverse_type(asn_TYPE_descriptor_t *td);
 void	define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol);
 VALUE   lookup_type(struct asn_TYPE_member_s *tms);
 int		consumeBytes(const void *buffer, size_t size, void *application_specific_key);
+int		validate_encoding(VALUE encoding);
+
+asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 
 /*
  * Externals
  */
-extern asn_TYPE_descriptor_t asn_DEF_INTEGER;
 extern VALUE encode_sequence(VALUE class, VALUE encoder, VALUE v);
 extern VALUE decode_sequence(VALUE class, VALUE encoder, VALUE sequence);
 
@@ -173,5 +176,71 @@ consumeBytes(const void *buffer, size_t size, void *application_specific_key)
 	bufferInfo->offset += size;
 
 	return 0;
+}
+
+
+/*
+ * validate_encoding
+ */
+int
+validate_encoding(VALUE encoding)
+{
+	int val;
+
+	ID		asn_module_id, asn_error_module_id, asn_encoder_error_id;
+	VALUE	asn_module,    asn_error_module,    asn_encoder_error;
+	VALUE	error, argv[0];
+
+	VALUE  symbol_as_string = rb_funcall(encoding, rb_intern("to_s"), 0, rb_ary_new2(0));
+	char  *encoder = RSTRING_PTR(symbol_as_string);
+
+	val = strcmp(encoder, "ber");
+	if (val == 0)
+	{
+		return 1;
+	}
+	else if (strcmp(encoder, "der") == 0)
+	{
+		return 1;
+	}
+	else if (strcmp(encoder, "per") == 0)
+	{
+		return 1;
+	}
+	else if (strcmp(encoder, "xer") == 0)
+	{
+		return 1;
+	}
+
+	asn_module_id 			= rb_intern("Asn1");
+	asn_error_module_id		= rb_intern("Error");
+	asn_encoder_error_id	= rb_intern("EncoderTypeError");
+
+	asn_module			= rb_const_get(rb_cObject, asn_module_id);
+	asn_error_module	= rb_const_get(asn_module, asn_error_module_id);
+	asn_encoder_error	=  rb_const_get(asn_error_module, asn_encoder_error_id);
+
+	rb_raise(error, "Invalid encoding");
+
+	return 0;
+}
+
+
+asn_TYPE_descriptor_t *
+asn1_get_td_from_schema(VALUE class)
+{
+	asn_TYPE_descriptor_t *td = NULL;
+	char    *tdName = NULL;
+	VALUE    vTD;
+	int      length;
+
+	/*
+	 * Find type descriptor associated with class
+	 */
+	vTD    = rb_const_get(class, rb_intern("ASN1_TYPE"));
+	length = RSTRING_LEN(vTD);
+	tdName = RSTRING_PTR(vTD);
+
+	return get_type_descriptor(tdName);
 }
 

@@ -12,10 +12,15 @@
 VALUE encode_int(VALUE class, VALUE encoder, VALUE v);
 VALUE decode_int(VALUE class, VALUE encoder, VALUE bit_string);
 
-extern int		consumeBytes(const void *buffer, size_t size, void *application_specific_key);
+extern int	consumeBytes(const void *buffer, size_t size, void *application_specific_key);
+extern int	validate_encoding(VALUE encoding);
 
 extern asn_TYPE_descriptor_t asn_DEF_INTEGER;
 
+/*
+ * encode_int
+ * Convert a ruby FIXNUM to the nominated encoding.
+ */
 VALUE
 encode_int(VALUE class, VALUE encoder, VALUE v)
 {
@@ -28,15 +33,18 @@ encode_int(VALUE class, VALUE encoder, VALUE v)
     bi.length = 512;
 
 	/*
-	 * Extract number
+	 * Validate
 	 */
-	/*
-	if (!(Qtrue == rb_obj_is_kind_of(v, T_FIXNUM)))
+	validate_encoding(encoder);
+
+	if (!TYPE(v) == T_FIXNUM)
 	{
 		rb_raise(rb_eException, "Not an integer");
 	}
-	*/
 
+	/*
+	 * Extract number
+	 */
     long val = FIX2LONG(v);
 
 	/*
@@ -46,10 +54,10 @@ encode_int(VALUE class, VALUE encoder, VALUE v)
 	asn_DEF_INTEGER.der_encoder(&asn_DEF_INTEGER, (void *)&st, 0, 0, (asn_app_consume_bytes_f *)consumeBytes,
 								(void *)&bi);
 
-	encoded = rb_str_new(bi.buffer, bi.offset);
-
-	/* return INT2FIX(val + 1); */
-	return encoded;
+	/*
+	 * Return encoded string
+	 */
+	return rb_str_new(bi.buffer, bi.offset);
 }
 
 VALUE
@@ -59,6 +67,8 @@ decode_int(VALUE class, VALUE encoder, VALUE bit_string)
 	int			 length;
 	INTEGER_t	 *st = malloc(sizeof (INTEGER_t));
 	long		 result;
+
+	validate_encoding(encoder);
 
 	/* 1. Retrive BER string and its length. */
 	str    = RSTRING_PTR(bit_string);
