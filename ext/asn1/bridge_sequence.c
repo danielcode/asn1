@@ -22,7 +22,7 @@ VALUE  decode_sequence(VALUE class, VALUE encoder, VALUE sequence);
 extern VALUE asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, void *object);
 extern void  *asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VALUE byte_string);
 extern void  *enstruct_sequence(asn_TYPE_descriptor_t *td, VALUE class, VALUE v);
-extern VALUE destruct_sequence(VALUE schema_class, char *buffer);
+extern VALUE unstruct_sequence(VALUE schema_class, char *buffer);
 
 extern asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 
@@ -78,7 +78,7 @@ decode_sequence(VALUE class, VALUE encoder, VALUE byte_string)
 	/*
 	 * Convert from asn1c structure to ruby object
 	 */
-	v = destruct_sequence(class, (char *)st);
+	v = unstruct_sequence(class, (char *)st);
 
 	/*
 	 * Hand to ruby

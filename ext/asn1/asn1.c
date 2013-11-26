@@ -5,6 +5,8 @@ extern VALUE define_type(VALUE schema_root, VALUE type_root, char *descriptor_sy
 
 extern VALUE encode_int(VALUE class, VALUE encoder, VALUE v);
 extern VALUE decode_int(VALUE class, VALUE encoder, VALUE bit_string);
+extern VALUE encode_real(VALUE class, VALUE encoder, VALUE v);
+extern VALUE decode_real(VALUE class, VALUE encoder, VALUE bit_string);
 extern VALUE encode_ia5string(VALUE class, VALUE encoder, VALUE v);
 extern VALUE decode_ia5string(VALUE class, VALUE encoder, VALUE bit_string);
 
@@ -18,7 +20,7 @@ void Init_asn1()
 {
 	VALUE mAsn1, mError, cAsn1, cSchema, cType;
 	VALUE cEncoderTypeError;
-	VALUE cInteger, cIA5String;
+	VALUE cInteger, cReal, cIA5String;
 	VALUE cNewType;
 
 	mAsn1 = rb_define_module("Asn1");
@@ -65,6 +67,14 @@ void Init_asn1()
 
 	rb_define_singleton_method(cInteger, "encode", encode_int, 2);
 	rb_define_singleton_method(cInteger, "decode", decode_int, 2);
+
+	/*
+	 * Real
+	 */
+	cReal = rb_define_class_under(mAsn1, "Real", rb_cObject);
+
+	rb_define_singleton_method(cReal, "encode", encode_real, 2);
+	rb_define_singleton_method(cReal, "decode", decode_real, 2);
 
 	/*
 	 * IA5String

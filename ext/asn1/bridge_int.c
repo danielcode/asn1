@@ -4,16 +4,14 @@
 #include "asn_application.h"
 #include "INTEGER.h"
 
-#include "util.h"
-
 /*
  * Forward declarations
  */
 VALUE encode_int(VALUE class, VALUE encoder, VALUE v);
 VALUE decode_int(VALUE class, VALUE encoder, VALUE bit_string);
 
-extern int	consumeBytes(const void *buffer, size_t size, void *application_specific_key);
-extern int	validate_encoding(VALUE encoding);
+extern VALUE asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, void *object);
+void   *asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VALUE byte_string);
 
 extern asn_TYPE_descriptor_t asn_DEF_INTEGER;
 
@@ -24,23 +22,19 @@ extern asn_TYPE_descriptor_t asn_DEF_INTEGER;
 VALUE
 encode_int(VALUE class, VALUE encoder, VALUE v)
 {
-	bufferInfo_t bi;
-	INTEGER_t	 st;
-	VALUE		 encoded;
-
-	bi.buffer = (char *)malloc(512);
-    bi.offset = 0;
-    bi.length = 512;
+	INTEGER_t st;
+	st.buf  = NULL;
+	st.size = 0;
 
 	/*
 	 * Validate
 	 */
-	validate_encoding(encoder);
-
+	/*
 	if (!TYPE(v) == T_FIXNUM)
 	{
 		rb_raise(rb_eException, "Not an integer");
 	}
+	*/
 
 	/*
 	 * Extract number
@@ -51,31 +45,17 @@ encode_int(VALUE class, VALUE encoder, VALUE v)
 	 * Convert to ASN structure
 	 */
 	(void)asn_long2INTEGER(&st, val);
-	asn_DEF_INTEGER.der_encoder(&asn_DEF_INTEGER, (void *)&st, 0, 0, (asn_app_consume_bytes_f *)consumeBytes,
-								(void *)&bi);
 
-	/*
-	 * Return encoded string
-	 */
-	return rb_str_new(bi.buffer, bi.offset);
+	return asn1_encode_object(&asn_DEF_INTEGER, encoder, &st);
 }
 
 VALUE
-decode_int(VALUE class, VALUE encoder, VALUE bit_string)
+decode_int(VALUE class, VALUE encoder, VALUE byte_string)
 {
-	char		*str;
-	int			 length;
-	INTEGER_t	 *st = malloc(sizeof (INTEGER_t));
-	long		 result;
+	long result;
+	INTEGER_t *st = NULL; /* malloc(sizeof (INTEGER_t)); */
 
-	validate_encoding(encoder);
-
-	/* 1. Retrive BER string and its length. */
-	str    = RSTRING_PTR(bit_string);
-	length = RSTRING_LEN(bit_string);
-
-	/* 2. Decode BER to asn1c internal format */
-	asn_DEF_INTEGER.ber_decoder(NULL, &asn_DEF_INTEGER, (void **)&st, (void *)str, length, 0);
+	st = (INTEGER_t *)asn1_decode_object(&asn_DEF_INTEGER, encoder, byte_string);
 
 	/* 3. Convert to number */
 	(void)asn_INTEGER2long(st, &result);

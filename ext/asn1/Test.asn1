@@ -7,6 +7,7 @@ TestModel DEFINITIONS ::= BEGIN -- Module parameters preamble
   TestType ::= INTEGER
   Test2Type ::= TestType
   Test3Type ::= Test2Type
+  RealTest ::= REAL
 
   TestSequence ::= SEQUENCE {
     str     UTF8String,

@@ -17,11 +17,11 @@
 /*
  * Forward declarations
  */
-VALUE destruct_member(asn_TYPE_member_t *member, char *member_struct);
-VALUE destruct_sequence(VALUE schema_class, char *buffer);
-VALUE destruct_primitive(asn_TYPE_member_t *member, char *member_struct);
-VALUE asn1_destruct_integer(char *member_struct);
-VALUE asn1_destruct_ia5string(char *member_struct);
+VALUE unstruct_member(asn_TYPE_member_t *member, char *member_struct);
+VALUE unstruct_sequence(VALUE schema_class, char *buffer);
+VALUE unstruct_primitive(asn_TYPE_member_t *member, char *member_struct);
+VALUE asn1_unstruct_integer(char *member_struct);
+VALUE asn1_unstruct_ia5string(char *member_struct);
 
 static char *setter_name_from_member_name(char *name);
 
@@ -32,10 +32,10 @@ extern asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 
 
 /*
- * destruct_sequence
+ * unstruct_sequence
  */
 VALUE
-destruct_sequence(VALUE schema_class, char *buffer)
+unstruct_sequence(VALUE schema_class, char *buffer)
 {
 	char *symbol;
 	int	  i;
@@ -75,7 +75,7 @@ destruct_sequence(VALUE schema_class, char *buffer)
 			member_struct = buffer + member->memb_offset;
 		}
 
-		member_val = destruct_member(member, member_struct);
+		member_val = unstruct_member(member, member_struct);
 		rb_funcall(v, rb_intern(setter), 1, member_val);
 
 		free(setter);
@@ -86,11 +86,11 @@ destruct_sequence(VALUE schema_class, char *buffer)
 
 
 VALUE
-destruct_member(asn_TYPE_member_t *member, char *member_struct)
+unstruct_member(asn_TYPE_member_t *member, char *member_struct)
 {
 	if (member->type->generated == 0)
 	{
-		return destruct_primitive(member, member_struct);
+		return unstruct_primitive(member, member_struct);
 	}
 	else
 	{
@@ -101,23 +101,23 @@ destruct_member(asn_TYPE_member_t *member, char *member_struct)
 
 
 VALUE
-destruct_primitive(asn_TYPE_member_t *member, char *member_struct)
+unstruct_primitive(asn_TYPE_member_t *member, char *member_struct)
 {
 	if (member->type->base_type == ASN1_TYPE_INTEGER)
 	{
-		return asn1_destruct_integer(member_struct);
+		return asn1_unstruct_integer(member_struct);
 		/* rb_str_cat(tmpStr, "INTEGER\n", 8); */
 	}
 	else if (member->type->base_type == ASN1_TYPE_IA5String)
 	{
-		asn1_destruct_ia5string(member_struct);
+		asn1_unstruct_ia5string(member_struct);
 		/* rb_str_cat(tmpStr, "IA5String\n", 10); */
 	}
 }
 
 
 VALUE
-asn1_destruct_integer(char *member_struct)
+asn1_unstruct_integer(char *member_struct)
 {
 	long val;
 	int  ret;
@@ -130,7 +130,7 @@ asn1_destruct_integer(char *member_struct)
 
 
 VALUE
-asn1_destruct_ia5string(char *member_struct)
+asn1_unstruct_ia5string(char *member_struct)
 {
 	IA5String_t *ia5string = (IA5String_t *)member_struct;
 
