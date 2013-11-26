@@ -1,7 +1,8 @@
 TestModel DEFINITIONS ::= BEGIN -- Module parameters preamble
   SimpleSequence ::= SEQUENCE {
     simpleInt    INTEGER,
-    simpleString IA5String
+    simpleString IA5String,
+    simpleReal   REAL
   }
 
   TestType ::= INTEGER

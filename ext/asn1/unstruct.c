@@ -10,6 +10,7 @@
 #include "util.h"
 
 #include "INTEGER.h"
+#include "REAL.h"
 #include "IA5String.h"
 #include "OCTET_STRING.h"
 #include "SimpleSequence.h"
@@ -21,6 +22,7 @@ VALUE unstruct_member(asn_TYPE_member_t *member, char *member_struct);
 VALUE unstruct_sequence(VALUE schema_class, char *buffer);
 VALUE unstruct_primitive(asn_TYPE_member_t *member, char *member_struct);
 VALUE asn1_unstruct_integer(char *member_struct);
+VALUE asn1_unstruct_real(char *member_struct);
 VALUE asn1_unstruct_ia5string(char *member_struct);
 
 static char *setter_name_from_member_name(char *name);
@@ -31,9 +33,95 @@ static char *setter_name_from_member_name(char *name);
 extern asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 
 
-/*
- * unstruct_sequence
- */
+VALUE
+unstruct_member(asn_TYPE_member_t *member, char *member_struct)
+{
+	if (member->type->generated == 0)
+	{
+		return unstruct_primitive(member, member_struct);
+	}
+	else
+	{
+		return Qnil; /* XXXXX */
+		/* Constructed type */
+	}
+}
+
+
+VALUE
+unstruct_primitive(asn_TYPE_member_t *member, char *member_struct)
+{
+	VALUE v;
+
+	switch(member->type->base_type)
+	{
+		case ASN1_TYPE_INTEGER :
+			v = asn1_unstruct_integer(member_struct);
+			break;
+
+		case ASN1_TYPE_IA5String :
+			v = asn1_unstruct_ia5string(member_struct);
+			break;
+
+		case ASN1_TYPE_REAL :
+			v = asn1_unstruct_real(member_struct);
+			break;
+
+		default :
+			rb_raise(rb_eStandardError, "Can't unstruct base type");
+			break;
+	}
+
+	return v;
+}
+
+
+/******************************************************************************/
+/* INTEGER                                                                    */
+/******************************************************************************/
+VALUE
+asn1_unstruct_integer(char *member_struct)
+{
+	long val;
+	int  ret;
+
+	INTEGER_t *integer = (INTEGER_t *)member_struct;
+	ret = asn_INTEGER2long(integer, &val);
+
+	return INT2FIX(val);
+}
+
+
+/******************************************************************************/
+/* REAL                                                                       */
+/******************************************************************************/
+VALUE
+asn1_unstruct_real(char *member_struct)
+{
+	double	val;
+	int		ret;
+
+	REAL_t *real = (REAL_t *)member_struct;
+	ret = asn_REAL2double(real, &val);
+
+	return rb_float_new(val);
+}
+
+
+/******************************************************************************/
+/* IA5String                                                                  */
+/******************************************************************************/
+VALUE
+asn1_unstruct_ia5string(char *member_struct)
+{
+	IA5String_t *ia5string = (IA5String_t *)member_struct;
+
+	return rb_str_new(ia5string->buf, ia5string->size);
+}
+
+/******************************************************************************/
+/* SEQUENCE                                                                   */
+/******************************************************************************/
 VALUE
 unstruct_sequence(VALUE schema_class, char *buffer)
 {
@@ -83,60 +171,6 @@ unstruct_sequence(VALUE schema_class, char *buffer)
 
 	return v;
 }
-
-
-VALUE
-unstruct_member(asn_TYPE_member_t *member, char *member_struct)
-{
-	if (member->type->generated == 0)
-	{
-		return unstruct_primitive(member, member_struct);
-	}
-	else
-	{
-		return Qnil; /* XXXXX */
-		/* Constructed type */
-	}
-}
-
-
-VALUE
-unstruct_primitive(asn_TYPE_member_t *member, char *member_struct)
-{
-	if (member->type->base_type == ASN1_TYPE_INTEGER)
-	{
-		return asn1_unstruct_integer(member_struct);
-		/* rb_str_cat(tmpStr, "INTEGER\n", 8); */
-	}
-	else if (member->type->base_type == ASN1_TYPE_IA5String)
-	{
-		asn1_unstruct_ia5string(member_struct);
-		/* rb_str_cat(tmpStr, "IA5String\n", 10); */
-	}
-}
-
-
-VALUE
-asn1_unstruct_integer(char *member_struct)
-{
-	long val;
-	int  ret;
-
-	INTEGER_t *integer = (INTEGER_t *)member_struct;
-	ret = asn_INTEGER2long(integer, &val);
-
-	return INT2FIX(val);
-}
-
-
-VALUE
-asn1_unstruct_ia5string(char *member_struct)
-{
-	IA5String_t *ia5string = (IA5String_t *)member_struct;
-
-	return rb_str_new(ia5string->buf, ia5string->size);
-}
-
 
 static char *setter_name_from_member_name(char *name)
 {

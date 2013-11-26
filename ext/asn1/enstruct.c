@@ -11,6 +11,7 @@
 #include "util.h"
 
 #include "INTEGER.h"
+#include "REAL.h"
 #include "IA5String.h"
 #include "OCTET_STRING.h"
 #include "SimpleSequence.h"
@@ -22,6 +23,7 @@ char  *enstruct_member(VALUE v, asn_TYPE_member_t *member, char *member_struct);
 char  *enstruct_primitive(VALUE v, asn_TYPE_member_t *member, char *member_struct);
 void  *enstruct_sequence(asn_TYPE_descriptor_t *td, VALUE class, VALUE v);
 VALUE  asn1_enstruct_integer(VALUE v, asn_TYPE_member_t *member, void *container);
+VALUE  asn1_enstruct_real(VALUE v, asn_TYPE_member_t *member, void *container);
 VALUE  asn1_enstruct_ia5string(VALUE v, asn_TYPE_member_t *member, void *container);
 
 
@@ -57,19 +59,32 @@ enstruct_primitive(VALUE v, asn_TYPE_member_t *member, char *member_struct)
 {
 	asn_TYPE_descriptor_t	*element_td = member->type;
 
-	if (element_td->base_type == ASN1_TYPE_INTEGER)
+	switch(element_td->base_type)
 	{
-		asn1_enstruct_integer(v, member, (void *)member_struct);
-	}
-	else if (element_td->base_type == ASN1_TYPE_IA5String)
-	{
-		asn1_enstruct_ia5string(v, member, (void *)member_struct);
+		case ASN1_TYPE_INTEGER :
+			asn1_enstruct_integer(v, member, (void *)member_struct);
+			break;
+
+		case ASN1_TYPE_IA5String :
+			asn1_enstruct_ia5string(v, member, (void *)member_struct);
+			break;
+
+		case ASN1_TYPE_REAL :
+			asn1_enstruct_real(v, member, (void *)member_struct);
+			break;
+
+		default :
+			rb_raise(rb_eStandardError, "Can't enstruct base type");
+			break;
 	}
 
 	return member_struct;
 }
 
 
+/******************************************************************************/
+/* INTEGER                                                                    */
+/******************************************************************************/
 VALUE
 asn1_enstruct_integer(VALUE v, asn_TYPE_member_t *member, void *container)
 {
@@ -83,14 +98,37 @@ asn1_enstruct_integer(VALUE v, asn_TYPE_member_t *member, void *container)
 	}
 	*/
 
-	result = asn_long2INTEGER((INTEGER_t *)container, val);
+	result = asn_long2INTEGER((REAL_t *)container, val);
 
 	return Qnil;
 }
 
-/*
- * Note: assuming OCTET_STRING is constant length
- */
+
+/******************************************************************************/
+/* REAL                                                                       */
+/******************************************************************************/
+VALUE
+asn1_enstruct_real(VALUE v, asn_TYPE_member_t *member, void *container)
+{
+	int		result;
+	VALUE	memb = rb_funcall(v, rb_intern(member->name), 0, rb_ary_new2(0));
+	double	val  = NUM2DBL(memb);
+
+	/*
+	if (!(TYPE(v) == T_FIXNUM)) {
+		rb_raise(rb_eException, "Not an integer");
+	}
+	*/
+
+	result = asn_double2REAL((REAL_t *)container, val);
+
+	return Qnil;
+}
+
+/******************************************************************************/
+/* IA5String                                                                  */
+/* Note: assuming OCTET_STRING is constant length                             */
+/******************************************************************************/
 VALUE
 asn1_enstruct_ia5string(VALUE v, asn_TYPE_member_t *member, void *container)
 {
@@ -113,6 +151,9 @@ asn1_enstruct_ia5string(VALUE v, asn_TYPE_member_t *member, void *container)
 	return Qnil;
 }
 
+/******************************************************************************/
+/* SEQUENCE                                                                   */
+/******************************************************************************/
 /*
  * enstruct_sequence
  */
