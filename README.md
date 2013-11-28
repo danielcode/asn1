@@ -15,6 +15,45 @@ Decoding of UTF8String and INTEGER works, and sequence comprising INTEGER and IA
 Requires modified version of asn1c, available here:
 https://github.com/danielcode/asn1c
 
+Status
+------
+| ASN.1 Type        | Status      |
+|-------------------|-------------|
+| ANY               |             |
+| BIT_STRING        |             |
+| BMPString         |             |
+| BOOLEAN           |             |
+| ENUMERATED        |             |
+| GeneralString     |             |
+| GeneralizedTime   |             |
+| GraphicString     |             |
+| IA5String         |             |
+| INTEGER           |             |
+| ISO646String      |             |
+| NULL              |             |
+| NumericString     |             |
+| OBJECT_IDENTIFIER |             |
+| OCTET_STRING      |             |
+| ObjectDescriptor  |             |
+| PrintableString   |             |
+| REAL              |             |
+| RELATIVE-OID      |             |
+| T61String         |             |
+| TeletexString     |             |
+| UTCTime           |             |
+| UTF8String        |             |
+| UniversalString   |             |
+| VideotexString    |             |
+| VisibleString     |             |
+| CHOICE            |             |
+| SEQUENCE          |             |
+| SEQUENCE_OF       |             |
+| SET               |             |
+| SET_OF            |             |
+
+
+
+
 Building
 --------
 * asn1c must be in your path
@@ -72,3 +111,7 @@ Classes
 #### Asn1::Integer
 
 #### Asn1::IA5String
+
+Exclusions
+----------
+* Doesn't handle ambiguous CHOICE elements
