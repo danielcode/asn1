@@ -17,41 +17,39 @@ https://github.com/danielcode/asn1c
 
 Status
 ------
-| ASN.1 Type        | Status      |
-|-------------------|-------------|
-| ANY               |             |
-| BIT_STRING        |             |
-| BMPString         |             |
-| BOOLEAN           |             |
-| ENUMERATED        |             |
-| GeneralString     |             |
-| GeneralizedTime   |             |
-| GraphicString     |             |
-| IA5String         |             |
-| INTEGER           |             |
-| ISO646String      |             |
-| NULL              |             |
-| NumericString     |             |
-| OBJECT_IDENTIFIER |             |
-| OCTET_STRING      |             |
-| ObjectDescriptor  |             |
-| PrintableString   |             |
-| REAL              |             |
-| RELATIVE-OID      |             |
-| T61String         |             |
-| TeletexString     |             |
-| UTCTime           |             |
-| UTF8String        |             |
-| UniversalString   |             |
-| VideotexString    |             |
-| VisibleString     |             |
-| CHOICE            |             |
-| SEQUENCE          |             |
-| SEQUENCE_OF       |             |
-| SET               |             |
-| SET_OF            |             |
-
-
+| ASN.1 Type        | Status      | Ruby Class      | Use in Structured Types (SEQUENCE only for now) |
+|-------------------|-------------|-----------------|-------------------------------------------------|
+| ANY               |             |                 |                                                 |
+| BIT_STRING        |             |                 |                                                 |
+| BMPString         |             |                 |                                                 |
+| BOOLEAN           |             | Asn1::Boolean   | Yes                                             |
+| ENUMERATED        |             |                 |                                                 |
+| GeneralString     |             |                 |                                                 |
+| GeneralizedTime   |             |                 |                                                 |
+| GraphicString     |             |                 |                                                 |
+| IA5String         |             | Asn1::IA5String | Yes                                             |
+| INTEGER           |             | Asn1::Integer   | Yes                                             |
+| ISO646String      |             |                 |                                                 |
+| NULL              |             | Asn1::Null      | Yes                                             |
+| NumericString     |             |                 |                                                 |
+| OBJECT_IDENTIFIER |             |                 |                                                 |
+| OCTET_STRING      |             |                 |                                                 |
+| ObjectDescriptor  |             |                 |                                                 |
+| PrintableString   |             |                 |                                                 |
+| REAL              |             | Asn1::Real      | Yes                                             |
+| RELATIVE-OID      |             |                 |                                                 |
+| T61String         |             |                 |                                                 |
+| TeletexString     |             |                 |                                                 |
+| UTCTime           |             |                 |                                                 |
+| UTF8String        |             |                 |                                                 |
+| UniversalString   |             |                 |                                                 |
+| VideotexString    |             |                 |                                                 |
+| VisibleString     |             |                 |                                                 |
+| CHOICE            |             |                 |                                                 |
+| SEQUENCE          |             |                 |                                                 |
+| SEQUENCE_OF       |             |                 |                                                 |
+| SET               |             |                 |                                                 |
+| SET_OF            |             |                 |                                                 |
 
 
 Building
