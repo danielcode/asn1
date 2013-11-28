@@ -19,10 +19,10 @@ VALUE  decode_sequence(VALUE class, VALUE encoder, VALUE sequence);
 /*
  * Externals
  */
-extern VALUE asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, void *object);
+extern VALUE  asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, void *object);
 extern void  *asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VALUE byte_string);
 extern void  *enstruct_sequence(asn_TYPE_descriptor_t *td, VALUE class, VALUE v);
-extern VALUE unstruct_sequence(VALUE schema_class, char *buffer);
+extern VALUE  unstruct_sequence(VALUE schema_class, char *buffer);
 
 extern asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 

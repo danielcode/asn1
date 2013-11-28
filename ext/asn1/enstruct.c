@@ -12,6 +12,8 @@
 
 #include "INTEGER.h"
 #include "REAL.h"
+#include "BOOLEAN.h"
+#include "NULL.h"
 #include "IA5String.h"
 #include "OCTET_STRING.h"
 #include "SimpleSequence.h"
@@ -25,6 +27,7 @@ void  *enstruct_sequence(asn_TYPE_descriptor_t *td, VALUE class, VALUE v);
 VALUE  asn1_enstruct_integer(VALUE v, asn_TYPE_member_t *member, void *container);
 VALUE  asn1_enstruct_real(VALUE v, asn_TYPE_member_t *member, void *container);
 VALUE  asn1_enstruct_boolean(VALUE v, asn_TYPE_member_t *member, void *container);
+VALUE  asn1_enstruct_null(VALUE v, asn_TYPE_member_t *member, void *container);
 VALUE  asn1_enstruct_ia5string(VALUE v, asn_TYPE_member_t *member, void *container);
 
 
@@ -76,6 +79,10 @@ enstruct_primitive(VALUE v, asn_TYPE_member_t *member, char *member_struct)
 
 		case ASN1_TYPE_BOOLEAN :
 			asn1_enstruct_boolean(v, member, (void *)member_struct);
+			break;
+
+		case ASN1_TYPE_NULL :
+			asn1_enstruct_null(v, member, (void *)member_struct);
 			break;
 
 		default :
@@ -151,6 +158,25 @@ asn1_enstruct_boolean(VALUE v, asn_TYPE_member_t *member, void *container)
 	{
 		rb_raise(rb_eStandardError, "Not a boolean class");
 	}
+
+	return Qnil;
+}
+
+/******************************************************************************/
+/* NULL                                                                       */
+/******************************************************************************/
+VALUE
+asn1_enstruct_null(VALUE v, asn_TYPE_member_t *member, void *container)
+{
+	NULL_t	null = 0;
+	VALUE	memb = rb_funcall(v, rb_intern(member->name), 0, rb_ary_new2(0));
+	
+	if (TYPE(memb) != T_NIL)
+	{
+		rb_raise(rb_eStandardError, "Not nil");
+	}
+
+	memcpy(container, (void *)&null, sizeof(NULL_t));
 
 	return Qnil;
 }

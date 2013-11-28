@@ -11,6 +11,8 @@
 
 #include "INTEGER.h"
 #include "REAL.h"
+#include "BOOLEAN.h"
+#include "NULL.h"
 #include "IA5String.h"
 #include "OCTET_STRING.h"
 #include "SimpleSequence.h"
@@ -24,6 +26,7 @@ VALUE unstruct_primitive(asn_TYPE_member_t *member, char *member_struct);
 VALUE asn1_unstruct_integer(char *member_struct);
 VALUE asn1_unstruct_real(char *member_struct);
 VALUE asn1_unstruct_boolean(char *member_struct);
+VALUE asn1_unstruct_null(char *member_struct);
 VALUE asn1_unstruct_ia5string(char *member_struct);
 
 static char *setter_name_from_member_name(char *name);
@@ -70,6 +73,10 @@ unstruct_primitive(asn_TYPE_member_t *member, char *member_struct)
 
 		case ASN1_TYPE_BOOLEAN :
 			v = asn1_unstruct_boolean(member_struct);
+			break;
+
+		case ASN1_TYPE_NULL :
+			v = asn1_unstruct_null(member_struct);
 			break;
 
 		default :
@@ -127,6 +134,16 @@ asn1_unstruct_boolean(char *member_struct)
 	}
 
 	return Qtrue;
+}
+
+
+/******************************************************************************/
+/* NULL                                                                    */
+/******************************************************************************/
+VALUE
+asn1_unstruct_null(char *member_struct)
+{
+	return Qnil;
 }
 
 

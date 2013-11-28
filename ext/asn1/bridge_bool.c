@@ -10,8 +10,8 @@
 VALUE encode_boolean(VALUE class, VALUE encoder, VALUE v);
 VALUE decode_boolean(VALUE class, VALUE encoder, VALUE byte_string);
 
-extern VALUE asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, void *object);
-void   *asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VALUE byte_string);
+extern VALUE  asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, void *object);
+extern void  *asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VALUE byte_string);
 
 extern asn_TYPE_descriptor_t asn_DEF_BOOLEAN;
 

@@ -10,7 +10,7 @@
  * Forward declarations
  */
 VALUE encode_ia5string(VALUE class, VALUE encoder, VALUE v);
-VALUE decode_ia5string(VALUE class, VALUE encoder, VALUE bit_string);
+VALUE decode_ia5string(VALUE class, VALUE encoder, VALUE byte_string);
 
 extern int	consumeBytes(const void *buffer, size_t size, void *application_specific_key);
 
@@ -58,7 +58,7 @@ encode_ia5string(VALUE class, VALUE encoder, VALUE v)
 }
 
 VALUE
-decode_ia5string(VALUE class, VALUE encoder, VALUE bit_string)
+decode_ia5string(VALUE class, VALUE encoder, VALUE byte_string)
 {
 	asn_codec_ctx_t context;
 	char		*str;
@@ -66,8 +66,8 @@ decode_ia5string(VALUE class, VALUE encoder, VALUE bit_string)
 	IA5String_t	 *st = NULL;
 
 	/* 1. Retrive BER string and its length. */
-	str    = RSTRING_PTR(bit_string);
-	length = RSTRING_LEN(bit_string);
+	str    = RSTRING_PTR(byte_string);
+	length = RSTRING_LEN(byte_string);
 
 	/* 2. Decode BER to asn1c internal format */
 	asn_DEF_IA5String.ber_decoder(NULL, &asn_DEF_IA5String, (void **)&st, (void *)str, length, 0);
