@@ -23,6 +23,7 @@ VALUE unstruct_sequence(VALUE schema_class, char *buffer);
 VALUE unstruct_primitive(asn_TYPE_member_t *member, char *member_struct);
 VALUE asn1_unstruct_integer(char *member_struct);
 VALUE asn1_unstruct_real(char *member_struct);
+VALUE asn1_unstruct_boolean(char *member_struct);
 VALUE asn1_unstruct_ia5string(char *member_struct);
 
 static char *setter_name_from_member_name(char *name);
@@ -67,6 +68,10 @@ unstruct_primitive(asn_TYPE_member_t *member, char *member_struct)
 			v = asn1_unstruct_real(member_struct);
 			break;
 
+		case ASN1_TYPE_BOOLEAN :
+			v = asn1_unstruct_boolean(member_struct);
+			break;
+
 		default :
 			rb_raise(rb_eStandardError, "Can't unstruct base type");
 			break;
@@ -105,6 +110,23 @@ asn1_unstruct_real(char *member_struct)
 	ret = asn_REAL2double(real, &val);
 
 	return rb_float_new(val);
+}
+
+
+/******************************************************************************/
+/* BOOLEAN                                                                    */
+/******************************************************************************/
+VALUE
+asn1_unstruct_boolean(char *member_struct)
+{
+	BOOLEAN_t *bool = (BOOLEAN_t *)member_struct;
+
+	if (*bool == 0)
+	{
+		return Qfalse;
+	}
+
+	return Qtrue;
 }
 
 

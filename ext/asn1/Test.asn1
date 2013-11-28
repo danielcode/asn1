@@ -2,13 +2,16 @@ TestModel DEFINITIONS ::= BEGIN -- Module parameters preamble
   SimpleSequence ::= SEQUENCE {
     simpleInt    INTEGER,
     simpleString IA5String,
-    simpleReal   REAL
+    simpleReal   REAL,
+    simpleBool   BOOLEAN
   }
 
   TestType ::= INTEGER
   Test2Type ::= TestType
   Test3Type ::= Test2Type
   RealTest ::= REAL
+  BoolTest ::= BOOLEAN
+  NullTest ::= NULL
 
   TestSequence ::= SEQUENCE {
     str     UTF8String,

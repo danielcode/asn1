@@ -7,6 +7,8 @@ extern VALUE encode_int(VALUE class, VALUE encoder, VALUE v);
 extern VALUE decode_int(VALUE class, VALUE encoder, VALUE bit_string);
 extern VALUE encode_real(VALUE class, VALUE encoder, VALUE v);
 extern VALUE decode_real(VALUE class, VALUE encoder, VALUE bit_string);
+extern VALUE encode_boolean(VALUE class, VALUE encoder, VALUE v);
+extern VALUE decode_boolean(VALUE class, VALUE encoder, VALUE byte_string);
 extern VALUE encode_ia5string(VALUE class, VALUE encoder, VALUE v);
 extern VALUE decode_ia5string(VALUE class, VALUE encoder, VALUE bit_string);
 
@@ -20,7 +22,7 @@ void Init_asn1()
 {
 	VALUE mAsn1, mError, cAsn1, cSchema, cType;
 	VALUE cEncoderTypeError;
-	VALUE cInteger, cReal, cIA5String;
+	VALUE cInteger, cReal, cBoolean, cIA5String;
 	VALUE cNewType;
 
 	mAsn1 = rb_define_module("Asn1");
@@ -75,6 +77,15 @@ void Init_asn1()
 
 	rb_define_singleton_method(cReal, "encode", encode_real, 2);
 	rb_define_singleton_method(cReal, "decode", decode_real, 2);
+
+	/*
+	 * Boolean
+	 */
+	cBoolean = rb_define_class_under(mAsn1, "Boolean", rb_cObject);
+
+	rb_define_singleton_method(cBoolean, "encode", encode_boolean, 2);
+	rb_define_singleton_method(cBoolean, "decode", decode_boolean, 2);
+	
 
 	/*
 	 * IA5String

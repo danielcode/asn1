@@ -24,6 +24,7 @@ char  *enstruct_primitive(VALUE v, asn_TYPE_member_t *member, char *member_struc
 void  *enstruct_sequence(asn_TYPE_descriptor_t *td, VALUE class, VALUE v);
 VALUE  asn1_enstruct_integer(VALUE v, asn_TYPE_member_t *member, void *container);
 VALUE  asn1_enstruct_real(VALUE v, asn_TYPE_member_t *member, void *container);
+VALUE  asn1_enstruct_boolean(VALUE v, asn_TYPE_member_t *member, void *container);
 VALUE  asn1_enstruct_ia5string(VALUE v, asn_TYPE_member_t *member, void *container);
 
 
@@ -71,6 +72,10 @@ enstruct_primitive(VALUE v, asn_TYPE_member_t *member, char *member_struct)
 
 		case ASN1_TYPE_REAL :
 			asn1_enstruct_real(v, member, (void *)member_struct);
+			break;
+
+		case ASN1_TYPE_BOOLEAN :
+			asn1_enstruct_boolean(v, member, (void *)member_struct);
 			break;
 
 		default :
@@ -126,6 +131,31 @@ asn1_enstruct_real(VALUE v, asn_TYPE_member_t *member, void *container)
 }
 
 /******************************************************************************/
+/* BOOLEAN                                                                    */
+/******************************************************************************/
+VALUE
+asn1_enstruct_boolean(VALUE v, asn_TYPE_member_t *member, void *container)
+{
+	int		result;
+	VALUE	memb = rb_funcall(v, rb_intern(member->name), 0, rb_ary_new2(0));
+	
+	if (TYPE(memb) == T_FALSE)
+	{
+		*((BOOLEAN_t *)container) = 0;
+	}
+	else if (TYPE(memb) == T_TRUE)
+	{
+		*((BOOLEAN_t *)container) = 1;
+	}
+	else
+	{
+		rb_raise(rb_eStandardError, "Not a boolean class");
+	}
+
+	return Qnil;
+}
+
+/******************************************************************************/
 /* IA5String                                                                  */
 /* Note: assuming OCTET_STRING is constant length                             */
 /******************************************************************************/
@@ -154,9 +184,6 @@ asn1_enstruct_ia5string(VALUE v, asn_TYPE_member_t *member, void *container)
 /******************************************************************************/
 /* SEQUENCE                                                                   */
 /******************************************************************************/
-/*
- * enstruct_sequence
- */
 void *
 enstruct_sequence(asn_TYPE_descriptor_t *td, VALUE class, VALUE v)
 {
