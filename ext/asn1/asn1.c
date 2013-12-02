@@ -25,6 +25,8 @@ void Init_asn1()
 	VALUE mAsn1, mError, cAsn1, cSchema, cType;
 	VALUE cEncoderTypeError;
 	VALUE cInteger, cReal, cBoolean, cNull, cIA5String;
+	VALUE cUndefined;
+
 	VALUE cNewType;
 
 	mAsn1 = rb_define_module("Asn1");
@@ -103,4 +105,8 @@ void Init_asn1()
 
 	rb_define_singleton_method(cIA5String, "encode", encode_ia5string, 2);
 	rb_define_singleton_method(cIA5String, "decode", decode_ia5string, 2);
+
+	/* ************************************************************************** */
+	/* Other          															  */
+	/* ************************************************************************** */
 }

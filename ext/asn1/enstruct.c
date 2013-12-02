@@ -1,7 +1,10 @@
-
 /*
  *
  */
+
+/******************************************************************************/
+/* Include files                                                              */
+/******************************************************************************/
 #include <stdlib.h>
 #include <ruby.h>
 
@@ -18,35 +21,38 @@
 #include "OCTET_STRING.h"
 #include "SimpleSequence.h"
 
-/*
- * Forward declarations
- */
-char  *enstruct_member(VALUE v, asn_TYPE_member_t *member, char *member_struct);
-char  *enstruct_primitive(VALUE v, asn_TYPE_member_t *member, char *member_struct);
-void  *enstruct_sequence(asn_TYPE_descriptor_t *td, VALUE class, VALUE v);
-VALUE  asn1_enstruct_integer(VALUE v, asn_TYPE_member_t *member, void *container);
-VALUE  asn1_enstruct_real(VALUE v, asn_TYPE_member_t *member, void *container);
-VALUE  asn1_enstruct_boolean(VALUE v, asn_TYPE_member_t *member, void *container);
-VALUE  asn1_enstruct_null(VALUE v, asn_TYPE_member_t *member, void *container);
-VALUE  asn1_enstruct_ia5string(VALUE v, asn_TYPE_member_t *member, void *container);
+/******************************************************************************/
+/* Include files                                                              */
+/******************************************************************************/
+char  *enstruct_sequence(asn_TYPE_descriptor_t *td, VALUE class, VALUE v);
+void  *enstruct_member(VALUE v,    asn_TYPE_member_t *member, void *container);
+void  *enstruct_primitive(VALUE v, asn_TYPE_member_t *member, void *container);
+VALUE  enstruct_integer(VALUE v,   asn_TYPE_member_t *member, void *container);
+VALUE  enstruct_real(VALUE v,      asn_TYPE_member_t *member, void *container);
+VALUE  enstruct_boolean(VALUE v,   asn_TYPE_member_t *member, void *container);
+VALUE  enstruct_null(VALUE v,      asn_TYPE_member_t *member, void *container);
+VALUE  enstruct_ia5string(VALUE v, asn_TYPE_member_t *member, void *container);
 
 
-/*
- * Externals
- */
-extern asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
+/******************************************************************************/
+/* Include files                                                              */
+/******************************************************************************/
+extern	asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
+int		is_undefined(VALUE v, int base_type);
+VALUE	get_optional_value(VALUE v, asn_TYPE_member_t *member);
+
 
 
 /*
  * enstruct_member
  * Returns C struct equivalent of corresponding ruby object
  */
-char *
-enstruct_member(VALUE v, asn_TYPE_member_t *member, char *member_struct)
+void *
+enstruct_member(VALUE v, asn_TYPE_member_t *member, void *container)
 {
 	if (member->type->generated == 0)
 	{
-		return enstruct_primitive(v, member, member_struct);
+		return enstruct_primitive(v, member, container);
 	}
 	else
 	{
@@ -58,31 +64,31 @@ enstruct_member(VALUE v, asn_TYPE_member_t *member, char *member_struct)
 /*
  * enstruct_primitive
  */
-char *
-enstruct_primitive(VALUE v, asn_TYPE_member_t *member, char *member_struct)
+void *
+enstruct_primitive(VALUE v, asn_TYPE_member_t *member, void *container)
 {
 	asn_TYPE_descriptor_t	*element_td = member->type;
 
 	switch(element_td->base_type)
 	{
 		case ASN1_TYPE_INTEGER :
-			asn1_enstruct_integer(v, member, (void *)member_struct);
+			enstruct_integer(v, member, container);
 			break;
 
 		case ASN1_TYPE_IA5String :
-			asn1_enstruct_ia5string(v, member, (void *)member_struct);
+			enstruct_ia5string(v, member, container);
 			break;
 
 		case ASN1_TYPE_REAL :
-			asn1_enstruct_real(v, member, (void *)member_struct);
+			enstruct_real(v, member, container);
 			break;
 
 		case ASN1_TYPE_BOOLEAN :
-			asn1_enstruct_boolean(v, member, (void *)member_struct);
+			enstruct_boolean(v, member, container);
 			break;
 
 		case ASN1_TYPE_NULL :
-			asn1_enstruct_null(v, member, (void *)member_struct);
+			enstruct_null(v, member, container);
 			break;
 
 		default :
@@ -90,7 +96,7 @@ enstruct_primitive(VALUE v, asn_TYPE_member_t *member, char *member_struct)
 			break;
 	}
 
-	return member_struct;
+	return container;
 }
 
 
@@ -98,17 +104,15 @@ enstruct_primitive(VALUE v, asn_TYPE_member_t *member, char *member_struct)
 /* INTEGER                                                                    */
 /******************************************************************************/
 VALUE
-asn1_enstruct_integer(VALUE v, asn_TYPE_member_t *member, void *container)
+enstruct_integer(VALUE v, asn_TYPE_member_t *member, void *container)
 {
+	long  val = NUM2LONG(v);
 	int   result;
-	VALUE memb = rb_funcall(v, rb_intern(member->name), 0, rb_ary_new2(0));
-	long  val  = NUM2LONG(memb);
 
-	/*
-	if (!(TYPE(v) == T_FIXNUM)) {
+	if (TYPE(v) != T_FIXNUM)
+	{
 		rb_raise(rb_eException, "Not an integer");
 	}
-	*/
 
 	result = asn_long2INTEGER((REAL_t *)container, val);
 
@@ -120,14 +124,14 @@ asn1_enstruct_integer(VALUE v, asn_TYPE_member_t *member, void *container)
 /* REAL                                                                       */
 /******************************************************************************/
 VALUE
-asn1_enstruct_real(VALUE v, asn_TYPE_member_t *member, void *container)
+enstruct_real(VALUE v, asn_TYPE_member_t *member, void *container)
 {
 	int		result;
-	VALUE	memb = rb_funcall(v, rb_intern(member->name), 0, rb_ary_new2(0));
-	double	val  = NUM2DBL(memb);
+	double	val  = NUM2DBL(v);
 
 	/*
-	if (!(TYPE(v) == T_FIXNUM)) {
+	if (!(TYPE(v) == T_FIXNUM))
+	{
 		rb_raise(rb_eException, "Not an integer");
 	}
 	*/
@@ -141,16 +145,15 @@ asn1_enstruct_real(VALUE v, asn_TYPE_member_t *member, void *container)
 /* BOOLEAN                                                                    */
 /******************************************************************************/
 VALUE
-asn1_enstruct_boolean(VALUE v, asn_TYPE_member_t *member, void *container)
+enstruct_boolean(VALUE v, asn_TYPE_member_t *member, void *container)
 {
 	int		result;
-	VALUE	memb = rb_funcall(v, rb_intern(member->name), 0, rb_ary_new2(0));
 	
-	if (TYPE(memb) == T_FALSE)
+	if (TYPE(v) == T_FALSE)
 	{
 		*((BOOLEAN_t *)container) = 0;
 	}
-	else if (TYPE(memb) == T_TRUE)
+	else if (TYPE(v) == T_TRUE)
 	{
 		*((BOOLEAN_t *)container) = 1;
 	}
@@ -166,12 +169,11 @@ asn1_enstruct_boolean(VALUE v, asn_TYPE_member_t *member, void *container)
 /* NULL                                                                       */
 /******************************************************************************/
 VALUE
-asn1_enstruct_null(VALUE v, asn_TYPE_member_t *member, void *container)
+enstruct_null(VALUE v, asn_TYPE_member_t *member, void *container)
 {
 	NULL_t	null = 0;
-	VALUE	memb = rb_funcall(v, rb_intern(member->name), 0, rb_ary_new2(0));
 	
-	if (TYPE(memb) != T_NIL)
+	if (TYPE(v) != T_NIL)
 	{
 		rb_raise(rb_eStandardError, "Not nil");
 	}
@@ -186,17 +188,17 @@ asn1_enstruct_null(VALUE v, asn_TYPE_member_t *member, void *container)
 /* Note: assuming OCTET_STRING is constant length                             */
 /******************************************************************************/
 VALUE
-asn1_enstruct_ia5string(VALUE v, asn_TYPE_member_t *member, void *container)
+enstruct_ia5string(VALUE v, asn_TYPE_member_t *member, void *container)
 {
+    char  *str    = RSTRING_PTR(v);
+	int    length = RSTRING_LEN(v);
 	int    result;
-	VALUE  memb   = rb_funcall(v, rb_intern(member->name), 0, rb_ary_new2(0));
-    char  *str    = RSTRING_PTR(memb);
-	int    length = RSTRING_LEN(memb);
 
 	OCTET_STRING_t *os = NULL;
 
 	/*
-	if (!(TYPE(v) == T_STRING)) {
+	if (!(TYPE(v) == T_STRING))
+	{
 		rb_raise(rb_eException, "Not a string");
 	}
 	*/
@@ -210,52 +212,57 @@ asn1_enstruct_ia5string(VALUE v, asn_TYPE_member_t *member, void *container)
 /******************************************************************************/
 /* SEQUENCE                                                                   */
 /******************************************************************************/
-void *
-enstruct_sequence(asn_TYPE_descriptor_t *td, VALUE class, VALUE v)
+char *
+enstruct_sequence(asn_TYPE_descriptor_t *td, VALUE class, VALUE sequence)
 {
 	char  *str;
 	char  *holding_struct;
 	int	  length;
 	VALUE encoded;
-	VALUE tmpStr = rb_str_new2("");
 
 	int i;
 
 	/*
-	 * 2. Create a new C struct we'll use to hold data data
+	 * Create a new C struct we'll use to hold data data
 	 */
 	holding_struct = calloc(1, td->container_size);
-	if (holding_struct == NULL) {
+	if (holding_struct == NULL)
+	{
 		rb_raise(rb_eException, "Can't calloc memory");
 	}
 
 	/*
-	 * 3. Go encoding
+	 * Go encoding
 	 */
 	for (i = 0; i < td->elements_count; i++)
 	{
 		asn_TYPE_member_t *member = (asn_TYPE_member_t *)&td->elements[i];
-
-		char *member_struct;
+		VALUE v = get_optional_value(sequence, member);
+		char *container =  holding_struct + member->memb_offset;
+		int   is_optional_and_absent = 0;
 
 		/*
 		 * XXXXX - add explanation
 		 */
 		if (member->flags & ATF_POINTER)
 		{
-			/* Need to create a new one */
-			rb_raise(rb_eException, "No code to create new");
+			char *val = NULL;
+
+			if (member->optional && is_undefined(v, member->type->base_type))
+			{
+				*((char **)container) = NULL;
+				continue; 
+			}
+
+			val = calloc(1, member->type->container_size);
+			*((char **)container) = val;
+			enstruct_member(v, member, val);
 		}
 		else
 		{
-			member_struct = holding_struct + member->memb_offset;
+			enstruct_member(v, member, container);
 		}
-
-		enstruct_member(v, member, member_struct);
 	}
-
-    str    = RSTRING_PTR(v);
-	length = RSTRING_LEN(v);
 
 	return holding_struct;
 }

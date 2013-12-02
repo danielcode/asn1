@@ -17,6 +17,9 @@ void	define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol);
 VALUE   lookup_type(struct asn_TYPE_member_s *tms);
 int		consumeBytes(const void *buffer, size_t size, void *application_specific_key);
 int		validate_encoding(VALUE encoding);
+int		is_undefined(VALUE v, int base_type);
+VALUE	get_optional_value(VALUE v, asn_TYPE_member_t *member);
+VALUE	instance_of_undefined(void);
 
 asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 
@@ -218,7 +221,7 @@ validate_encoding(VALUE encoding)
 
 	asn_module			= rb_const_get(rb_cObject, asn_module_id);
 	asn_error_module	= rb_const_get(asn_module, asn_error_module_id);
-	asn_encoder_error	=  rb_const_get(asn_error_module, asn_encoder_error_id);
+	asn_encoder_error	= rb_const_get(asn_error_module, asn_encoder_error_id);
 
 	rb_raise(error, "Invalid encoding");
 
@@ -244,3 +247,46 @@ asn1_get_td_from_schema(VALUE class)
 	return get_type_descriptor(tdName);
 }
 
+
+int
+is_undefined(VALUE v, int base_type)
+{
+	const char *c = rb_obj_classname(v);
+	if (strcmp(c, "Asn1::Undefined") == 0)
+	{
+		return 1;
+	}
+
+	if ((TYPE(v) == T_NIL) && (base_type != ASN1_TYPE_NULL))
+	{
+		return 1;
+	}
+
+
+	return 0;
+}
+
+VALUE
+get_optional_value(VALUE v, asn_TYPE_member_t *member)
+{
+	VALUE memb = rb_funcall(v, rb_intern(member->name), 0, rb_ary_new2(0));
+
+	if (is_undefined(v, member->type->base_type) && !member->optional)
+	{
+		rb_raise(rb_eStandardError, "Value absent, but not optional");
+	}
+
+	return memb;
+}
+
+VALUE
+instance_of_undefined(void)
+{
+	ID asn_module_id	  = rb_intern("Asn1");
+    ID undefined_class_id = rb_intern("Undefined");
+
+	VALUE asn_module	  = rb_const_get(rb_cObject, asn_module_id);
+	VALUE undefined_class = rb_const_get(asn_module, undefined_class_id);
+
+	return rb_funcall(undefined_class, rb_intern("instance"), 0, rb_ary_new2(0));
+}

@@ -5,7 +5,9 @@ TestModel DEFINITIONS ::= BEGIN -- Module parameters preamble
     simpleString IA5String,
     simpleReal   REAL,
     simpleBool   BOOLEAN,
-    simpleNull   NULL
+    simpleNull   NULL,
+	simpleOptInt INTEGER OPTIONAL,
+    optNull      NULL OPTIONAL -- Hardly simple
   }
 
   TestType ::= INTEGER
