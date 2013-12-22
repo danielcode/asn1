@@ -266,3 +266,12 @@ enstruct_sequence(asn_TYPE_descriptor_t *td, VALUE class, VALUE sequence)
 
 	return holding_struct;
 }
+
+
+/******************************************************************************/
+/* CHOICE                                                                     */
+/******************************************************************************/
+char *
+enstruct_choice(asn_TYPE_descriptor_t *td, VALUE class, VALUE sequence)
+{
+}

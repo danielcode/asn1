@@ -105,8 +105,4 @@ void Init_asn1()
 
 	rb_define_singleton_method(cIA5String, "encode", encode_ia5string, 2);
 	rb_define_singleton_method(cIA5String, "decode", decode_ia5string, 2);
-
-	/* ************************************************************************** */
-	/* Other          															  */
-	/* ************************************************************************** */
 }

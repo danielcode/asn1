@@ -1,3 +1,6 @@
+/******************************************************************************/
+/* Include files                                                              */
+/******************************************************************************/
 #include <stdlib.h>
 #include <string.h>
 #include <dlfcn.h>	/* For dlopen, etc. */
@@ -6,14 +9,16 @@
 #include "asn_application.h"
 #include "util.h"
 
-/*
- * Forward declarations
- */
+/******************************************************************************/
+/* Forward declarations                                                       */
+/******************************************************************************/
 asn_TYPE_descriptor_t *get_type_descriptor(const char *name);
 
 VALUE   traverse_type(VALUE class, VALUE name);
 VALUE   _traverse_type(asn_TYPE_descriptor_t *td);
+VALUE	create_attribute_hash(struct asn_TYPE_member_s *element);
 void	define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol);
+VALUE	find_or_create_schema(VALUE schema_root, char *descriptor_symbol, VALUE candidate_type);
 VALUE   lookup_type(struct asn_TYPE_member_s *tms);
 int		consumeBytes(const void *buffer, size_t size, void *application_specific_key);
 int		validate_encoding(VALUE encoding);
@@ -23,9 +28,9 @@ VALUE	instance_of_undefined(void);
 
 asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 
-/*
- * Externals
- */
+/******************************************************************************/
+/* Externals                                                                  */
+/******************************************************************************/
 extern VALUE encode_sequence(VALUE class, VALUE encoder, VALUE v);
 extern VALUE decode_sequence(VALUE class, VALUE encoder, VALUE sequence);
 
@@ -33,49 +38,79 @@ extern VALUE decode_sequence(VALUE class, VALUE encoder, VALUE sequence);
 /******************************************************************************/
 /* define_type                                                                */
 /* Returns a ruby class associated with a corresponding ASN.1 type            */
+/* XXXXX - need to handle recursively defined types                           */
 /******************************************************************************/
 void
 define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol)
 {
 	int   i;
 	VALUE type_class, schema_class;
-	VALUE type_hash = rb_hash_new();
 	asn_TYPE_descriptor_t *td = get_type_descriptor(descriptor_symbol);
 
-	type_class   = rb_define_class_under(type_root,   td->name, rb_cObject);
-	schema_class = rb_define_class_under(schema_root, td->name, rb_cObject);
+	type_class   = rb_define_class_under(type_root, td->name, rb_cObject);
 
 	/*
 	 * 1. Create reference to schema class from type class
 	 */
-	rb_define_const(type_class, "ASN1_SCHEMA", schema_class);
 	rb_define_const(type_class, "ASN1_TYPE",   rb_str_new2("asn_DEF_SimpleSequence"));
 
 	/*
-	 * 2. Define schema class
-	 */
-	rb_define_const(schema_class, "ANONYMOUS",      INT2FIX(td->anonymous));
-	rb_define_const(schema_class, "PRIMITIVE",      INT2FIX(td->generated));
-	rb_define_const(schema_class, "CANDIDATE_TYPE", type_class);
-	rb_define_const(schema_class, "ASN1_TYPE",      rb_str_new2("asn_DEF_SimpleSequence"));
-
-	rb_define_singleton_method(schema_class, "encode", encode_sequence, 2);
-	rb_define_singleton_method(schema_class, "decode", decode_sequence, 2);
-
-	/*
-	 * 3. Traverse type elements
+	 * 2. Traverse type elements
 	 */
 	for (i = 0; i < td->elements_count; i++)
 	{
 		if (strlen(td->elements[i].name) > 0)
 		{
 			rb_define_attr(type_class, td->elements[i].name, 1, 1);
-			rb_hash_aset(type_hash, rb_str_new2(td->elements[i].name), lookup_type(&td->elements[i]));
+		}
+	}
+
+	/*
+	 * 3. Attach schema to type
+	 */
+	schema_class = find_or_create_schema(schema_root, descriptor_symbol, type_class);
+	rb_define_const(type_class, "ASN1_SCHEMA", schema_class);
+}
+
+
+/******************************************************************************/
+/* find_or_create_schema                                                      */
+/* Returns a ruby class associated with a corresponding ASN.1 type            */
+/******************************************************************************/
+VALUE
+find_or_create_schema(VALUE schema_root, char *descriptor_symbol, VALUE candidate_type)
+{
+	VALUE schema_class;
+	VALUE type_hash = rb_hash_new();
+	int   i;
+
+	asn_TYPE_descriptor_t *td = get_type_descriptor(descriptor_symbol);
+	schema_class = rb_define_class_under(schema_root, td->name, rb_cObject);
+
+	rb_define_singleton_method(schema_class, "encode", encode_sequence, 2);
+	rb_define_singleton_method(schema_class, "decode", decode_sequence, 2);
+
+	/*
+	 * Define schema class
+	 */
+	rb_define_const(schema_class, "ANONYMOUS",      INT2FIX(td->anonymous));
+	rb_define_const(schema_class, "PRIMITIVE",      INT2FIX(td->generated));
+	rb_define_const(schema_class, "CANDIDATE_TYPE", candidate_type);
+	rb_define_const(schema_class, "ASN1_TYPE",      rb_str_new2("asn_DEF_SimpleSequence"));
+
+	for (i = 0; i < td->elements_count; i++)
+	{
+		if (strlen(td->elements[i].name) > 0)
+		{
+			rb_hash_aset(type_hash, rb_str_new2(td->elements[i].name), create_attribute_hash(&td->elements[i]));
 		}
 	}
 
 	rb_define_const(schema_class, "ATTRIBUTES", type_hash);
+
+	return schema_class;
 }
+
 
 /*
  * get_type_descriptor
@@ -106,10 +141,10 @@ get_type_descriptor(const char *symbol)
 	return td;
 }
 
-/* ************************************************************************** */
+/******************************************************************************/
 /* traverse_type                                                              */
 /* _traverse_type                                                             */
-/* ************************************************************************** */
+/******************************************************************************/
 VALUE
 traverse_type(VALUE class, VALUE name)
 {
@@ -156,9 +191,24 @@ _traverse_type(asn_TYPE_descriptor_t *td)
 	return hsh;
 }
 
-/*
- * lookup_type
- */
+/******************************************************************************/
+/* create_attribute_hash                                                      */
+/******************************************************************************/
+VALUE
+create_attribute_hash(struct asn_TYPE_member_s *element)
+{
+	VALUE attribute_hash = rb_hash_new();
+	rb_hash_aset(attribute_hash, rb_str_new2("type"),      lookup_type(element));
+	rb_hash_aset(attribute_hash, rb_str_new2("base_type"), rb_str_new2("NOT WORKING"));
+	rb_hash_aset(attribute_hash, rb_str_new2("optional"),  INT2FIX(element->optional));
+
+	return attribute_hash;
+}
+
+
+/******************************************************************************/
+/* lookup_type                                                                */
+/******************************************************************************/
 VALUE
 lookup_type(struct asn_TYPE_member_s *tms)
 {
@@ -166,9 +216,9 @@ lookup_type(struct asn_TYPE_member_s *tms)
 }
 
 
-/*
- * consume_bytes
- */
+/******************************************************************************/
+/* consume_bytes                                                              */
+/******************************************************************************/
 int
 consumeBytes(const void *buffer, size_t size, void *application_specific_key)
 {
