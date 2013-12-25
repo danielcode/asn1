@@ -18,6 +18,8 @@ VALUE   traverse_type(VALUE class, VALUE name);
 VALUE   _traverse_type(asn_TYPE_descriptor_t *td);
 VALUE	create_attribute_hash(struct asn_TYPE_member_s *element);
 void	define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol);
+VALUE	define_sequence(VALUE type_root, asn_TYPE_descriptor_t *td);
+VALUE	define_choice(VALUE type_root, asn_TYPE_descriptor_t *td);
 VALUE	find_or_create_schema(VALUE schema_root, char *descriptor_symbol, VALUE candidate_type);
 VALUE   lookup_type(struct asn_TYPE_member_s *tms);
 int		consumeBytes(const void *buffer, size_t size, void *application_specific_key);
@@ -47,22 +49,30 @@ define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol)
 	VALUE type_class, schema_class;
 	asn_TYPE_descriptor_t *td = get_type_descriptor(descriptor_symbol);
 
-	type_class   = rb_define_class_under(type_root, td->name, rb_cObject);
+	type_class = define_sequence(type_root, td);
 
 	/*
 	 * 1. Create reference to schema class from type class
 	 */
-	rb_define_const(type_class, "ASN1_TYPE",   rb_str_new2("asn_DEF_SimpleSequence"));
+	rb_define_const(type_class, "ASN1_TYPE", rb_str_new2(descriptor_symbol));
 
 	/*
 	 * 2. Traverse type elements
+	 * XXXXX - process based on underlying type.
 	 */
-	for (i = 0; i < td->elements_count; i++)
+	switch(td->base_type)
 	{
-		if (strlen(td->elements[i].name) > 0)
-		{
-			rb_define_attr(type_class, td->elements[i].name, 1, 1);
-		}
+		case ASN1_TYPE_SEQUENCE :
+			define_sequence(type_root, td);
+			break;
+
+		case ASN1_TYPE_CHOICE :
+			define_choice(type_root, td);
+			break;
+
+		default :
+			rb_raise(rb_eException, "Can't create type");
+			break;
 	}
 
 	/*
@@ -72,6 +82,56 @@ define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol)
 	rb_define_const(type_class, "ASN1_SCHEMA", schema_class);
 }
 
+/******************************************************************************/
+/* define_seqeuence                                                           */
+/******************************************************************************/
+VALUE
+define_sequence(VALUE type_root, asn_TYPE_descriptor_t *td)
+{
+	VALUE type_class = rb_define_class_under(type_root, td->name, rb_cObject);
+	int	i;
+
+	for (i = 0; i < td->elements_count; i++)
+	{
+		if (strlen(td->elements[i].name) > 0)
+		{
+			rb_define_attr(type_class, td->elements[i].name, 1, 1);
+		}
+	}
+
+	return type_class;
+}
+
+/******************************************************************************/
+/* define_choice                                                              */
+/******************************************************************************/
+VALUE
+define_choice(VALUE type_root, asn_TYPE_descriptor_t *td)
+{
+	ID asn_module_id	  		 = rb_intern("Asn1");
+    ID asn_accessorize_module_id = rb_intern("Accessorize");
+
+	VALUE type_class = rb_define_class_under(type_root, td->name, rb_cObject);
+	VALUE params	 = rb_ary_new();
+
+	VALUE asn_module	  	 = rb_const_get(rb_cObject, asn_module_id);
+	VALUE accessorize_module = rb_const_get(asn_module, asn_accessorize_module_id);
+
+	int i;
+
+	rb_extend_object(type_class, accessorize_module);
+
+	for (i = 0; i < td->elements_count; i++)
+	{
+		if (strlen(td->elements[i].name) > 0)
+		{
+			VALUE v = rb_str_new2(td->elements[i].name);
+			(void)rb_ary_push(params, v);
+		}
+	}
+
+	rb_funcall(type_class, rb_intern("accessorize"), 1, params);
+}
 
 /******************************************************************************/
 /* find_or_create_schema                                                      */
@@ -96,7 +156,7 @@ find_or_create_schema(VALUE schema_root, char *descriptor_symbol, VALUE candidat
 	rb_define_const(schema_class, "ANONYMOUS",      INT2FIX(td->anonymous));
 	rb_define_const(schema_class, "PRIMITIVE",      INT2FIX(td->generated));
 	rb_define_const(schema_class, "CANDIDATE_TYPE", candidate_type);
-	rb_define_const(schema_class, "ASN1_TYPE",      rb_str_new2("asn_DEF_SimpleSequence"));
+	rb_define_const(schema_class, "ASN1_TYPE",      rb_str_new2("asn_DEF_SimpleSequence")); /* XXXXX */
 
 	for (i = 0; i < td->elements_count; i++)
 	{

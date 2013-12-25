@@ -1,4 +1,3 @@
-require 'asn1/asn1.so'
 require 'singleton'
 
 module Asn1
@@ -36,3 +35,5 @@ module Asn1
     accessorize(OPTIONS)
   end
 end
+
+require 'asn1/asn1.so'
