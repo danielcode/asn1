@@ -22,7 +22,7 @@ VALUE  decode_choice(VALUE class, VALUE encoder, VALUE sequence);
 extern VALUE  asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, void *object);
 extern void  *asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VALUE byte_string);
 extern void  *enstruct_sequence(asn_TYPE_descriptor_t *td, VALUE class, VALUE v);
-extern VALUE  unstruct_sequence(VALUE schema_class, char *buffer);
+extern void  *enstruct_choice(asn_TYPE_descriptor_t *td, VALUE class, VALUE v);
 
 extern asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 
@@ -47,7 +47,7 @@ encode_choice(VALUE class, VALUE encoder, VALUE v)
 	/*
 	 * 2. Create C struct equivalent of ruby object
 	 */
-	s  = enstruct_sequence(td, class, v);
+	s  = enstruct_choice(td, class, v);
 
 	/*
 	 * 3. Perform encoding to specified serialization format (i.e. BER, DER, PER or XML)
@@ -78,7 +78,7 @@ decode_choice(VALUE class, VALUE encoder, VALUE byte_string)
 	/*
 	 * Convert from asn1c structure to ruby object
 	 */
-	v = unstruct_sequence(class, (char *)st);
+	v = unstruct_choice(class, (char *)st);
 
 	/*
 	 * Hand to ruby

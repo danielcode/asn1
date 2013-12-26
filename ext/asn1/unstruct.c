@@ -16,7 +16,7 @@
 #include "NULL.h"
 #include "IA5String.h"
 #include "OCTET_STRING.h"
-#include "SimpleSequence.h"
+#include "constr_CHOICE.h"
 
 /*
  * Forward declarations
@@ -31,6 +31,11 @@ VALUE unstruct_boolean(  char *member_struct);
 VALUE unstruct_null(     char *member_struct);
 VALUE unstruct_ia5string(char *member_struct);
 
+VALUE unstruct_sequence(VALUE schema_class, char *buffer);
+VALUE unstruct_choice(VALUE schema_class, char *buffer);
+void  unstruct_struct_to_value(asn_TYPE_member_t *member, VALUE v, char *buffer);
+
+int			 get_presentation_value(char *buffer, int pres_size);
 static char *setter_name_from_member_name(char *name);
 
 /*
@@ -168,10 +173,8 @@ unstruct_ia5string(char *member_struct)
 VALUE
 unstruct_sequence(VALUE schema_class, char *buffer)
 {
-	SimpleSequence_t *ss = (SimpleSequence_t *)buffer;
-	char *symbol;
-	int	  i;
 	VALUE args = rb_ary_new2(0);
+	int	  i;
 
 	asn_TYPE_descriptor_t *td = asn1_get_td_from_schema(schema_class);
 
@@ -185,48 +188,97 @@ unstruct_sequence(VALUE schema_class, char *buffer)
 	{
 		asn_TYPE_member_t *member = (asn_TYPE_member_t *)&td->elements[i];
 
-		char  *member_struct;
-		char  *setter = setter_name_from_member_name(member->name);
-		VALUE  member_val;
-
-		/*
-		 * XXXXX - add explanation
-		 */
-		if (member->flags & ATF_POINTER)
-		{
-			char **p1 = (char **)(buffer + member->memb_offset);
-			member_struct = *p1;
-		}
-		else
-		{
-			member_struct = buffer + member->memb_offset;
-		}
-
-		if (member_struct == NULL)
-		{
-			if (member->type->base_type == ASN1_TYPE_NULL)
-			{
-				assert(member->optional);
-				rb_funcall(v, rb_intern(setter), 1, instance_of_undefined());
-			}
-			else
-			{
-				rb_funcall(v, rb_intern(setter), 1, Qnil);
-			}
-		}
-		else
-		{
-			member_val = unstruct_member(member, member_struct);
-			rb_funcall(v, rb_intern(setter), 1, member_val);
-		}
-
-		free(setter);
+		unstruct_struct_to_value(member, v, buffer);
 	}
 
 	return v;
 }
 
-static char *setter_name_from_member_name(char *name)
+
+/******************************************************************************/
+/* CHOICE																	  */
+/******************************************************************************/
+VALUE
+unstruct_choice(VALUE schema_class, char *buffer)
+{
+	VALUE  args	  = rb_ary_new2(0);
+	VALUE  params = rb_ary_new();
+	VALUE  choice;
+	int	   index;
+
+	asn_TYPE_descriptor_t  *td		  = asn1_get_td_from_schema(schema_class);
+    asn_CHOICE_specifics_t *specifics = (asn_CHOICE_specifics_t *)td->specifics;
+	asn_TYPE_member_t	   *member;
+
+	index  = get_presentation_value(buffer, specifics->pres_size);
+	member = (asn_TYPE_member_t *)&td->elements[index];
+
+	VALUE class = rb_const_get(schema_class, rb_intern("CANDIDATE_TYPE"));
+	VALUE v     = rb_class_new_instance(0, &args, class);
+
+	/*
+	 * asn1_choice_value
+	 */
+	unstruct_struct_to_value(member, v, buffer);
+
+	choice = ID2SYM(rb_intern(member->name));
+	(void)rb_ary_push(params, choice);
+	(void)rb_funcall(v, rb_intern("asn1_choice_value="), 1, params);
+
+	return v;
+}
+
+
+/******************************************************************************/
+/* unstruct_struct_to_value													  */
+/******************************************************************************/
+void
+unstruct_struct_to_value(asn_TYPE_member_t *member, VALUE v, char *buffer)
+{
+	char  *member_struct;
+	char  *setter = setter_name_from_member_name(member->name);
+	VALUE  member_val;
+
+	/*
+	 * XXXXX - add explanation
+	 */
+	if (member->flags & ATF_POINTER)
+	{
+		char **p1 = (char **)(buffer + member->memb_offset);
+		member_struct = *p1;
+	}
+	else
+	{
+		member_struct = buffer + member->memb_offset;
+	}
+
+	if (member_struct == NULL)
+	{
+		if (member->type->base_type == ASN1_TYPE_NULL)
+		{
+			assert(member->optional);
+			rb_funcall(v, rb_intern(setter), 1, instance_of_undefined());
+		}
+		else
+		{
+			rb_funcall(v, rb_intern(setter), 1, Qnil);
+		}
+	}
+	else
+	{
+		member_val = unstruct_member(member, member_struct);
+		rb_funcall(v, rb_intern(setter), 1, member_val);
+	}
+
+	free(setter);
+}
+
+
+/******************************************************************************/
+/* setter_name_from_member_name												  */
+/******************************************************************************/
+static char *
+setter_name_from_member_name(char *name)
 {
 	int   setter_len = strlen(name) + 2;
 	char *setter     = (char *)calloc(setter_len, sizeof(char));
@@ -235,4 +287,18 @@ static char *setter_name_from_member_name(char *name)
 	(void)strcat(setter, "=");
 
 	return setter;
+} 
+
+
+/******************************************************************************/
+/* get_presentation_value                                                     */
+/* XXXXX - broken; doesn't account for differing pres_size values             */
+/******************************************************************************/
+int
+get_presentation_value(char *buffer, int pres_size)
+{
+    int *pres_ptr = (int *)(buffer + pres_size);
+
+    return *pres_ptr;
 }
+
