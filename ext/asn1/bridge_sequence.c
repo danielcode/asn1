@@ -13,7 +13,7 @@
  * Forward declarations
  */
 VALUE  encode_sequence(VALUE class, VALUE encoder, VALUE v);
-VALUE  decode_sequence(VALUE class, VALUE encoder, VALUE sequence);
+VALUE  decode_sequence(VALUE class, VALUE encoder, VALUE byte_string);
 
 
 /*

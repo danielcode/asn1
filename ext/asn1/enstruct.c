@@ -33,11 +33,14 @@ VALUE  enstruct_boolean(VALUE v,   asn_TYPE_member_t *member, void *container);
 VALUE  enstruct_null(VALUE v,      asn_TYPE_member_t *member, void *container);
 VALUE  enstruct_ia5string(VALUE v, asn_TYPE_member_t *member, void *container);
 
-void	enstruct_value_to_struct(VALUE v, asn_TYPE_member_t *member, char *container);
+void	 enstruct_value_to_struct(VALUE v, asn_TYPE_member_t *member, char *container);
+char	*enstruct_choice_value(asn_TYPE_descriptor_t *td, int id, VALUE value);
 
 static char *create_holding_struct(int size);
 static int	 get_id_of_choice(asn_TYPE_descriptor_t *td, VALUE choice);
-void		 set_presentation_value(char *holding_struct, int pres_size, int id);
+VALUE		 get_choice_value_sym(VALUE choice);
+VALUE		 get_choice_value(VALUE choice, VALUE sym);
+void		 set_presentation_value(char *holding_struct, int pres_offset, int pres_size, int id);
 
 
 /******************************************************************************/
@@ -249,27 +252,36 @@ enstruct_sequence(asn_TYPE_descriptor_t *td, VALUE class, VALUE sequence)
 /* XXXXX - Assert we have a CHOICE                                            */
 /******************************************************************************/
 char *
-enstruct_choice(asn_TYPE_descriptor_t *td, VALUE class, VALUE v)
+enstruct_choice(asn_TYPE_descriptor_t *td, VALUE class, VALUE choice)
 {
-	asn_CHOICE_specifics_t *specifics = (asn_CHOICE_specifics_t *)td->specifics;
-	asn_TYPE_member_t	   *member    = NULL;
-	char *holding_struct = create_holding_struct(specifics->struct_size);
+	VALUE choice_sym, value;
 	int	  id;
 	
-	/*
-	 * 1. Work out which option is selected
-	 * 2. Encode it into the holding struct
-	 * 3. Set the "present" element
-	 */
-	id = get_id_of_choice(td, v);
+	choice_sym = get_choice_value_sym(choice);
+	id		   = get_id_of_choice(td, choice_sym);
+	value	   = get_choice_value(choice, choice_sym);
 
 	/*
 	 * Found the index of the member to encode.
 	 */
-	member = (asn_TYPE_member_t *)&td->elements[id];
+	return enstruct_choice_value(td, id, value);
+}
 
-	enstruct_value_to_struct(v, member, holding_struct);
-	set_presentation_value(holding_struct, specifics->pres_size, id);
+
+/******************************************************************************/
+/* enstruct_choice_value													  */
+/******************************************************************************/
+char *
+enstruct_choice_value(asn_TYPE_descriptor_t *td, int id, VALUE value)
+{
+	asn_TYPE_member_t		*member	   = (asn_TYPE_member_t *)&td->elements[id];
+	asn_CHOICE_specifics_t	*specifics = (asn_CHOICE_specifics_t *)td->specifics;
+
+	char *holding_struct  = create_holding_struct(specifics->struct_size);
+	char *value_container = holding_struct + member->memb_offset;
+
+	enstruct_value_to_struct(value, member, value_container);
+	set_presentation_value(holding_struct, specifics->pres_offset, specifics->pres_size, id + 1);
 }
 
 
@@ -325,18 +337,13 @@ create_holding_struct(int size)
 /* Determine the identifier of the choice selected.							  */
 /******************************************************************************/
 static int
-get_id_of_choice(asn_TYPE_descriptor_t *td, VALUE choice) /* Members might be sufficient */
+get_id_of_choice(asn_TYPE_descriptor_t *td, VALUE choice_value_sym)
 {
-	VALUE  choice_sym, choice_str;
+	VALUE  choice_str;
 	char  *choice_name;
 	int	   i = 0, found = 0;
 
-	/*
-	 * 1. Get value of asn1_choice_value
-	 */
-	choice_sym  = rb_funcall(choice, rb_intern("asn1_choice_value"), 0, rb_ary_new2(0));
-	choice_str  = rb_funcall(choice_sym, rb_intern("to_s"), 0, rb_ary_new2(0));
-	choice_name = RSTRING_PTR(choice_str);
+	choice_str = rb_funcall(choice_value_sym, rb_intern("to_s"), 0, rb_ary_new2(0));
 
 	/*
 	 * 2. Match 
@@ -346,13 +353,15 @@ get_id_of_choice(asn_TYPE_descriptor_t *td, VALUE choice) /* Members might be su
 		return 0;
 	}
 
+	choice_name = RSTRING_PTR(choice_str);
 	for (i = 0; i < td->elements_count && found == 0; i++)
 	{
 		asn_TYPE_member_t *member = (asn_TYPE_member_t *)&td->elements[i];
 
 		if (strcmp(member->name, choice_name) == 0)
 		{
-			found = i + 1;
+			found = 1;
+			break;
 		}
 	}
 
@@ -361,7 +370,29 @@ get_id_of_choice(asn_TYPE_descriptor_t *td, VALUE choice) /* Members might be su
 		rb_raise(rb_eException, "Can't find choice");
 	}
 
-	return found;
+	return i;
+}
+
+
+/******************************************************************************/
+/* get_choice_value_sym														  */
+/* Get the symbol of the choice's value.            						  */
+/******************************************************************************/
+VALUE
+get_choice_value_sym(VALUE choice)
+{
+	return rb_funcall(choice, rb_intern("asn1_choice_value"), 0, rb_ary_new2(0));
+}
+
+
+/******************************************************************************/
+/* get_choice_value    														  */
+/* Get the value of the choice												  */
+/******************************************************************************/
+VALUE
+get_choice_value(VALUE choice, VALUE sym)
+{
+	return rb_funcall(choice, SYM2ID(sym), 0, rb_ary_new2(0));
 }
 
 
@@ -370,9 +401,9 @@ get_id_of_choice(asn_TYPE_descriptor_t *td, VALUE choice) /* Members might be su
 /* XXXXX - broken; doesn't account for differing pres_size values			  */
 /******************************************************************************/
 void
-set_presentation_value(char *holding_struct, int pres_size, int id)
+set_presentation_value(char *holding_struct, int pres_offset, int pres_size, int id)
 {
-	int *pres_ptr = (int *)(holding_struct + pres_size);
+	int *pres_ptr = (int *)(holding_struct + pres_offset);
 
 	*pres_ptr = id;
 }

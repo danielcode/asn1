@@ -35,6 +35,8 @@ asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 /******************************************************************************/
 extern VALUE encode_sequence(VALUE class, VALUE encoder, VALUE v);
 extern VALUE decode_sequence(VALUE class, VALUE encoder, VALUE sequence);
+extern VALUE encode_choice(VALUE class, VALUE encoder, VALUE v);
+extern VALUE decode_choice(VALUE class, VALUE encoder, VALUE byte_string);
 
 
 /******************************************************************************/
@@ -147,8 +149,8 @@ find_or_create_schema(VALUE schema_root, char *descriptor_symbol, VALUE candidat
 	asn_TYPE_descriptor_t *td = get_type_descriptor(descriptor_symbol);
 	schema_class = rb_define_class_under(schema_root, td->name, rb_cObject);
 
-	rb_define_singleton_method(schema_class, "encode", encode_sequence, 2);
-	rb_define_singleton_method(schema_class, "decode", decode_sequence, 2);
+	rb_define_singleton_method(schema_class, "encode", encode_choice, 2);
+	rb_define_singleton_method(schema_class, "decode", decode_choice, 2);
 
 	/*
 	 * Define schema class
@@ -156,7 +158,7 @@ find_or_create_schema(VALUE schema_root, char *descriptor_symbol, VALUE candidat
 	rb_define_const(schema_class, "ANONYMOUS",      INT2FIX(td->anonymous));
 	rb_define_const(schema_class, "PRIMITIVE",      INT2FIX(td->generated));
 	rb_define_const(schema_class, "CANDIDATE_TYPE", candidate_type);
-	rb_define_const(schema_class, "ASN1_TYPE",      rb_str_new2("asn_DEF_SimpleSequence")); /* XXXXX */
+	rb_define_const(schema_class, "ASN1_TYPE",      rb_str_new2(descriptor_symbol));
 
 	for (i = 0; i < td->elements_count; i++)
 	{
