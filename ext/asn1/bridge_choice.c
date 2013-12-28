@@ -23,6 +23,8 @@ extern VALUE  asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, voi
 extern void  *asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VALUE byte_string);
 extern void  *enstruct_sequence(asn_TYPE_descriptor_t *td, VALUE class, VALUE v);
 extern void  *enstruct_choice(asn_TYPE_descriptor_t *td, VALUE class, VALUE v);
+extern VALUE  unstruct_choice(VALUE schema_class, char *buffer);
+
 
 extern asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 
@@ -73,7 +75,7 @@ decode_choice(VALUE class, VALUE encoder, VALUE byte_string)
 		rb_raise(rb_eException, "Can't find type descriptor");
 	}
 
-	st = asn1_decode_object(td, encoder,byte_string);
+	st = asn1_decode_object(td, encoder, byte_string);
 
 	/*
 	 * Convert from asn1c structure to ruby object

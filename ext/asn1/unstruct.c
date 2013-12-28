@@ -17,6 +17,7 @@
 #include "IA5String.h"
 #include "OCTET_STRING.h"
 #include "constr_CHOICE.h"
+#include "TestChoice.h"
 
 /*
  * Forward declarations
@@ -35,7 +36,7 @@ VALUE unstruct_sequence(VALUE schema_class, char *buffer);
 VALUE unstruct_choice(VALUE schema_class, char *buffer);
 void  unstruct_struct_to_value(asn_TYPE_member_t *member, VALUE v, char *buffer);
 
-int			 get_presentation_value(char *buffer, int pres_size);
+int			 get_presentation_value(char *buffer, int offset, int pres_size);
 static char *setter_name_from_member_name(char *name);
 
 /*
@@ -202,7 +203,6 @@ VALUE
 unstruct_choice(VALUE schema_class, char *buffer)
 {
 	VALUE  args	  = rb_ary_new2(0);
-	VALUE  params = rb_ary_new();
 	VALUE  choice;
 	int	   index;
 
@@ -210,7 +210,7 @@ unstruct_choice(VALUE schema_class, char *buffer)
     asn_CHOICE_specifics_t *specifics = (asn_CHOICE_specifics_t *)td->specifics;
 	asn_TYPE_member_t	   *member;
 
-	index  = get_presentation_value(buffer, specifics->pres_size);
+	index  = get_presentation_value(buffer, specifics->pres_offset, specifics->pres_size);
 	member = (asn_TYPE_member_t *)&td->elements[index];
 
 	VALUE class = rb_const_get(schema_class, rb_intern("CANDIDATE_TYPE"));
@@ -222,8 +222,7 @@ unstruct_choice(VALUE schema_class, char *buffer)
 	unstruct_struct_to_value(member, v, buffer);
 
 	choice = ID2SYM(rb_intern(member->name));
-	(void)rb_ary_push(params, choice);
-	(void)rb_funcall(v, rb_intern("asn1_choice_value="), 1, params);
+	(void)rb_funcall(v, rb_intern("asn1_choice_value="), 1, choice);
 
 	return v;
 }
@@ -295,10 +294,11 @@ setter_name_from_member_name(char *name)
 /* XXXXX - broken; doesn't account for differing pres_size values             */
 /******************************************************************************/
 int
-get_presentation_value(char *buffer, int pres_size)
+get_presentation_value(char *buffer, int offset, int pres_size)
 {
-    int *pres_ptr = (int *)(buffer + pres_size);
+    int *pres_ptr = (int *)(buffer + offset);
+	int  index	  = *pres_ptr;
 
-    return *pres_ptr;
+    return index - 1;
 }
 
