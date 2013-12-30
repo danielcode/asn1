@@ -19,8 +19,11 @@ VALUE   _traverse_type(asn_TYPE_descriptor_t *td);
 VALUE	create_attribute_hash(struct asn_TYPE_member_s *element);
 void	define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol);
 VALUE	define_sequence(VALUE type_root, asn_TYPE_descriptor_t *td);
+VALUE	define_sequence_of(VALUE type_root, asn_TYPE_descriptor_t *td);
 VALUE	define_choice(VALUE type_root, asn_TYPE_descriptor_t *td);
 VALUE	find_or_create_schema(VALUE schema_root, char *descriptor_symbol, VALUE candidate_type);
+VALUE	ruby_class_from_asn1_type(asn_TYPE_descriptor_t *td);
+void	set_encoder_and_decoder(VALUE schema_class, int base_type);
 VALUE   lookup_type(struct asn_TYPE_member_s *tms);
 int		consumeBytes(const void *buffer, size_t size, void *application_specific_key);
 int		validate_encoding(VALUE encoding);
@@ -35,6 +38,8 @@ asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 /******************************************************************************/
 extern VALUE encode_sequence(VALUE class, VALUE encoder, VALUE v);
 extern VALUE decode_sequence(VALUE class, VALUE encoder, VALUE sequence);
+extern VALUE encode_sequence_of(VALUE class, VALUE encoder, VALUE v);
+extern VALUE decode_sequence_of(VALUE class, VALUE encoder, VALUE sequence);
 extern VALUE encode_choice(VALUE class, VALUE encoder, VALUE v);
 extern VALUE decode_choice(VALUE class, VALUE encoder, VALUE byte_string);
 
@@ -51,31 +56,32 @@ define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol)
 	VALUE type_class, schema_class;
 	asn_TYPE_descriptor_t *td = get_type_descriptor(descriptor_symbol);
 
-	type_class = define_sequence(type_root, td);
-
 	/*
-	 * 1. Create reference to schema class from type class
-	 */
-	rb_define_const(type_class, "ASN1_TYPE", rb_str_new2(descriptor_symbol));
-
-	/*
-	 * 2. Traverse type elements
-	 * XXXXX - process based on underlying type.
+	 * 1. 
 	 */
 	switch(td->base_type)
 	{
 		case ASN1_TYPE_SEQUENCE :
-			define_sequence(type_root, td);
+			type_class = define_sequence(type_root, td);
+			break;
+
+		case ASN1_TYPE_SEQUENCE_OF :
+			type_class = define_sequence_of(type_root, td);
 			break;
 
 		case ASN1_TYPE_CHOICE :
-			define_choice(type_root, td);
+			type_class = define_choice(type_root, td);
 			break;
 
 		default :
 			rb_raise(rb_eException, "Can't create type");
 			break;
 	}
+
+	/*
+	 * 2. Create reference to schema class from type class
+	 */
+	rb_define_const(type_class, "ASN1_TYPE", rb_str_new2(descriptor_symbol));
 
 	/*
 	 * 3. Attach schema to type
@@ -100,6 +106,17 @@ define_sequence(VALUE type_root, asn_TYPE_descriptor_t *td)
 			rb_define_attr(type_class, td->elements[i].name, 1, 1);
 		}
 	}
+
+	return type_class;
+}
+
+/******************************************************************************/
+/* define_seqeuence_of														  */
+/******************************************************************************/
+VALUE
+define_sequence_of(VALUE type_root, asn_TYPE_descriptor_t *td)
+{
+	VALUE type_class = rb_define_class_under(type_root, td->name, rb_cArray);
 
 	return type_class;
 }
@@ -133,6 +150,8 @@ define_choice(VALUE type_root, asn_TYPE_descriptor_t *td)
 	}
 
 	rb_funcall(type_class, rb_intern("accessorize"), 1, params);
+
+	return type_class;
 }
 
 /******************************************************************************/
@@ -149,9 +168,6 @@ find_or_create_schema(VALUE schema_root, char *descriptor_symbol, VALUE candidat
 	asn_TYPE_descriptor_t *td = get_type_descriptor(descriptor_symbol);
 	schema_class = rb_define_class_under(schema_root, td->name, rb_cObject);
 
-	rb_define_singleton_method(schema_class, "encode", encode_choice, 2);
-	rb_define_singleton_method(schema_class, "decode", decode_choice, 2);
-
 	/*
 	 * Define schema class
 	 */
@@ -160,17 +176,87 @@ find_or_create_schema(VALUE schema_root, char *descriptor_symbol, VALUE candidat
 	rb_define_const(schema_class, "CANDIDATE_TYPE", candidate_type);
 	rb_define_const(schema_class, "ASN1_TYPE",      rb_str_new2(descriptor_symbol));
 
-	for (i = 0; i < td->elements_count; i++)
+	/* XXXXX - Probably need to handle SET OF differently. */
+	if (td->base_type == ASN1_TYPE_SEQUENCE_OF || td->base_type == ASN1_TYPE_SET_OF)
 	{
-		if (strlen(td->elements[i].name) > 0)
+		asn_TYPE_descriptor_t *td2 = td->elements->type;
+		VALUE collection_type = ruby_class_from_asn1_type(td2);
+
+		rb_define_const(schema_class, "COLLECTION", INT2FIX(1));
+		rb_define_const(schema_class, "COLLECTION_TYPE", collection_type);
+	}
+	else
+	{
+		rb_define_const(schema_class, "COLLECTION", INT2FIX(0));
+		rb_define_const(schema_class, "COLLECTION_TYPE", Qnil);
+
+		for (i = 0; i < td->elements_count; i++)
 		{
-			rb_hash_aset(type_hash, rb_str_new2(td->elements[i].name), create_attribute_hash(&td->elements[i]));
+			if (strlen(td->elements[i].name) > 0)
+			{
+				rb_hash_aset(type_hash, rb_str_new2(td->elements[i].name),
+							 create_attribute_hash(&td->elements[i]));
+			}
 		}
 	}
 
 	rb_define_const(schema_class, "ATTRIBUTES", type_hash);
 
+	set_encoder_and_decoder(schema_class, td->base_type);
+
 	return schema_class;
+}
+
+
+/******************************************************************************/
+/* ruby_class_from_asn1_type												  */
+/******************************************************************************/
+VALUE
+ruby_class_from_asn1_type(asn_TYPE_descriptor_t *td)
+{
+	VALUE type;
+
+	switch(td->base_type)
+	{
+		case ASN1_TYPE_INTEGER :
+			type = rb_cFixnum;
+			break;
+
+		default :
+			rb_raise(rb_eException, "ruby_class_from_asn1_type(): can't locate type");
+			break;
+	}
+
+	return type;
+}
+
+
+/******************************************************************************/
+/* set_encoder_and_decoder													  */
+/******************************************************************************/
+void
+set_encoder_and_decoder(VALUE schema_class, int base_type)
+{
+	switch(base_type) {
+		case ASN1_TYPE_SEQUENCE :
+			rb_define_singleton_method(schema_class, "encode", encode_sequence, 2);
+			rb_define_singleton_method(schema_class, "decode", decode_sequence, 2);
+			break;
+
+		case ASN1_TYPE_SEQUENCE_OF :
+			rb_define_singleton_method(schema_class, "encode", encode_sequence_of, 2);
+			rb_define_singleton_method(schema_class, "decode", decode_sequence_of, 2);
+			break;
+
+		case ASN1_TYPE_CHOICE :
+			rb_define_singleton_method(schema_class, "encode", encode_choice, 2);
+			rb_define_singleton_method(schema_class, "decode", decode_choice, 2);
+			break;
+
+		default :
+			rb_raise(rb_eException, "set_encoder_and_decoder(): can't find type");
+			break;
+	}
 }
 
 

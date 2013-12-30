@@ -6,6 +6,7 @@
 /* Include files                                                              */
 /******************************************************************************/
 #include <stdlib.h>
+#include <assert.h>
 #include <ruby.h>
 
 #include "asn_application.h"
@@ -20,6 +21,7 @@
 #include "IA5String.h"
 #include "OCTET_STRING.h"
 #include "constr_CHOICE.h"
+#include "asn_SEQUENCE_OF.h"
 
 /******************************************************************************/
 /* Include files                                                              */
@@ -46,9 +48,9 @@ void		 set_presentation_value(char *holding_struct, int pres_offset, int pres_si
 /******************************************************************************/
 /* Include files                                                              */
 /******************************************************************************/
-extern	asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
-int		is_undefined(VALUE v, int base_type);
-VALUE	get_optional_value(VALUE v, asn_TYPE_member_t *member);
+extern asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
+extern int		is_undefined(VALUE v, int base_type);
+extern VALUE	get_optional_value(VALUE v, asn_TYPE_member_t *member);
 
 
 /*
@@ -241,6 +243,43 @@ enstruct_sequence(asn_TYPE_descriptor_t *td, VALUE class, VALUE sequence)
 		container =  holding_struct + member->memb_offset;
 
 		enstruct_value_to_struct(v, member, container);
+	}
+
+	return holding_struct;
+}
+
+
+/******************************************************************************/
+/* SEQUENCE_OF																  */
+/* Encode items in a SEQUENCE_OF											  */
+/* XXXXX - assert that TD is a sequence.                                      */
+/* XXXXX - assert sequence_of is an array (or enumerable)					  */
+/* XXXXX - class might not be required.                                       */
+/******************************************************************************/
+char *
+enstruct_sequence_of(asn_TYPE_descriptor_t *td, VALUE class, VALUE sequence_of)
+{
+	char *holding_struct = create_holding_struct(td->container_size);
+	asn_TYPE_member_t *member = td->elements; /* Just one in this case */
+	VALUE length_val = rb_funcall(sequence_of, rb_intern("length"), 0, rb_ary_new2(0));
+	int   length = FIX2INT(length_val);
+
+	assert(member->flags & ATF_POINTER); /* XXXXX - Appears to be the case */
+
+	VALUE  v, index;
+	int	   i;
+
+	for (i = 0; i < length; i++)
+	{
+		int fixval;
+		char *element_container = NULL;
+
+		index = INT2FIX(i);
+		v 	  = rb_funcall(sequence_of, rb_intern("[]"), 1, index);
+		fixval = FIX2INT(v);
+
+		enstruct_value_to_struct(v, member, (char *)&element_container);
+		asn_sequence_add(holding_struct, element_container);
 	}
 
 	return holding_struct;

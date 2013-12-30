@@ -22,6 +22,8 @@ TestModel DEFINITIONS ::= BEGIN -- Module parameters preamble
     int2 [1] INTEGER
   }
 
+  TestIntSequence ::= SEQUENCE OF INTEGER
+
   TestSequence ::= SEQUENCE {
     str     UTF8String,
     testVar TestType

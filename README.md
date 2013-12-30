@@ -5,12 +5,11 @@ Currently early stage proof-of-concept.
 
 Works by wrapping C produced by asn1c.
 
-Demonstrated ability to encode:
+Demonstrated ability to encode and decode:
 * UTF8String
 * INTEGER
 * SEQUENCE with IA5String and INTEGER
-
-Decoding of UTF8String and INTEGER works, and sequence comprising INTEGER and IA5String.
+* CHOICE
 
 Requires modified version of asn1c, available here:
 https://github.com/danielcode/asn1c

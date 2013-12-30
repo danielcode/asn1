@@ -27,7 +27,7 @@ void Init_asn1()
 	VALUE cInteger, cReal, cBoolean, cNull, cIA5String;
 	VALUE cUndefined;
 
-	VALUE cNewType, cTestChoice;
+	VALUE cNewType, cTestChoice, cTestIntSequence;
 
 	mAsn1 = rb_define_module("Asn1");
 	rb_define_singleton_method(mAsn1, "asn1_test", asn1_test, 0);
@@ -59,8 +59,9 @@ void Init_asn1()
 	/* ************************************************************************** */
 	/* Structured Types															  */
 	/* ************************************************************************** */
-	cNewType    = define_type(cSchema, cType, "asn_DEF_SimpleSequence");
-	cTestChoice = define_type(cSchema, cType, "asn_DEF_TestChoice");
+	cNewType		 = define_type(cSchema, cType, "asn_DEF_SimpleSequence");
+	cTestChoice		 = define_type(cSchema, cType, "asn_DEF_TestChoice");
+	cTestIntSequence = define_type(cSchema, cType, "asn_DEF_TestIntSequence");
 
 	/* ************************************************************************** */
 	/* Primitive Types															  */

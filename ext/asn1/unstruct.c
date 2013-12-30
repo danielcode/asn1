@@ -17,7 +17,6 @@
 #include "IA5String.h"
 #include "OCTET_STRING.h"
 #include "constr_CHOICE.h"
-#include "TestChoice.h"
 
 /*
  * Forward declarations
