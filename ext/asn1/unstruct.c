@@ -17,6 +17,7 @@
 #include "IA5String.h"
 #include "OCTET_STRING.h"
 #include "constr_CHOICE.h"
+#include "asn_SEQUENCE_OF.h"
 
 /*
  * Forward declarations
@@ -32,6 +33,7 @@ VALUE unstruct_null(     char *member_struct);
 VALUE unstruct_ia5string(char *member_struct);
 
 VALUE unstruct_sequence(VALUE schema_class, char *buffer);
+VALUE unstruct_sequence_of(VALUE schema_class, char *buffer);
 VALUE unstruct_choice(VALUE schema_class, char *buffer);
 void  unstruct_struct_to_value(asn_TYPE_member_t *member, VALUE v, char *buffer);
 
@@ -167,6 +169,7 @@ unstruct_ia5string(char *member_struct)
 	return rb_str_new(ia5string->buf, ia5string->size);
 }
 
+
 /******************************************************************************/
 /* SEQUENCE                                                                   */
 /******************************************************************************/
@@ -189,6 +192,38 @@ unstruct_sequence(VALUE schema_class, char *buffer)
 		asn_TYPE_member_t *member = (asn_TYPE_member_t *)&td->elements[i];
 
 		unstruct_struct_to_value(member, v, buffer);
+	}
+
+	return v;
+}
+
+
+/******************************************************************************/
+/* SEQUENCE_OF																  */
+/******************************************************************************/
+VALUE
+unstruct_sequence_of(VALUE schema_class, char *buffer)
+{
+	VALUE  args	= rb_ary_new2(0);
+	asn_anonymous_sequence_ *sequence_of = (asn_anonymous_sequence_ *)buffer;
+	int	  i;
+	int	  length = sequence_of->count;
+
+	asn_TYPE_descriptor_t *td	  = asn1_get_td_from_schema(schema_class);
+	asn_TYPE_member_t	  *member = td->elements;
+
+	VALUE class = rb_const_get(schema_class, rb_intern("CANDIDATE_TYPE"));
+	VALUE v     = rb_class_new_instance(0, &args, class);
+
+	/*
+	 *
+	 */
+	for (i = 0; i < length; i++)
+	{
+		VALUE element;
+		char *element_buffer = (char *)sequence_of->array[i];
+		element = unstruct_member(member, element_buffer);
+		rb_funcall(v, rb_intern("push"), 1, element);
 	}
 
 	return v;

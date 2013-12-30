@@ -255,6 +255,7 @@ enstruct_sequence(asn_TYPE_descriptor_t *td, VALUE class, VALUE sequence)
 /* XXXXX - assert that TD is a sequence.                                      */
 /* XXXXX - assert sequence_of is an array (or enumerable)					  */
 /* XXXXX - class might not be required.                                       */
+/* XXXXX - reference elements via "list"									  */
 /******************************************************************************/
 char *
 enstruct_sequence_of(asn_TYPE_descriptor_t *td, VALUE class, VALUE sequence_of)
