@@ -62,18 +62,17 @@ decode_sequence(VALUE class, VALUE encoder, VALUE byte_string)
 {
 	asn_TYPE_descriptor_t *td = NULL;
 
-	void *st = NULL;
-	char *str;
-	int	  length;
+	VALUE  v;
+	void  *st = NULL;
+	int	   length;
 
-	VALUE v;
 
 	td = asn1_get_td_from_schema(class);
 	if (td == NULL) {
 		rb_raise(rb_eException, "Can't find type descriptor");
 	}
 
-	st = asn1_decode_object(td, encoder,byte_string);
+	st = asn1_decode_object(td, encoder, byte_string);
 
 	/*
 	 * Convert from asn1c structure to ruby object

@@ -9,6 +9,8 @@
 #include "asn_application.h"
 #include "util.h"
 
+#include "ENUMERATED.h"
+
 /******************************************************************************/
 /* Forward declarations                                                       */
 /******************************************************************************/
@@ -21,6 +23,7 @@ void	define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol);
 VALUE	define_sequence(VALUE type_root, asn_TYPE_descriptor_t *td);
 VALUE	define_sequence_of(VALUE type_root, asn_TYPE_descriptor_t *td);
 VALUE	define_choice(VALUE type_root, asn_TYPE_descriptor_t *td);
+VALUE	define_enumerated(VALUE type_root, asn_TYPE_descriptor_t *td);
 VALUE	find_or_create_schema(VALUE schema_root, char *descriptor_symbol, VALUE candidate_type);
 VALUE	ruby_class_from_asn1_type(asn_TYPE_descriptor_t *td);
 void	set_encoder_and_decoder(VALUE schema_class, int base_type);
@@ -42,6 +45,8 @@ extern VALUE encode_sequence_of(VALUE class, VALUE encoder, VALUE v);
 extern VALUE decode_sequence_of(VALUE class, VALUE encoder, VALUE sequence);
 extern VALUE encode_choice(VALUE class, VALUE encoder, VALUE v);
 extern VALUE decode_choice(VALUE class, VALUE encoder, VALUE byte_string);
+extern VALUE encode_enumerated(VALUE class, VALUE encoder, VALUE v);
+extern VALUE decode_enumerated(VALUE class, VALUE encoder, VALUE byte_string);
 
 
 /******************************************************************************/
@@ -71,6 +76,10 @@ define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol)
 
 		case ASN1_TYPE_CHOICE :
 			type_class = define_choice(type_root, td);
+			break;
+
+		case ASN1_TYPE_ENUMERATED :
+			type_class = define_enumerated(type_root, td);
 			break;
 
 		default :
@@ -150,6 +159,44 @@ define_choice(VALUE type_root, asn_TYPE_descriptor_t *td)
 	}
 
 	rb_funcall(type_class, rb_intern("accessorize"), 1, params);
+
+	return type_class;
+}
+
+/******************************************************************************/
+/* define_enumerated														  */
+/******************************************************************************/
+VALUE
+define_enumerated(VALUE type_root, asn_TYPE_descriptor_t *td)
+{
+	asn_INTEGER_specifics_t *specifics = (asn_INTEGER_specifics_t *)td->specifics;
+
+	ID asn_module_id	  	   = rb_intern("Asn1");
+    ID asn_enumerize_module_id = rb_intern("Enumerize");
+
+	VALUE type_class = rb_define_class_under(type_root, td->name, rb_cObject);
+	VALUE params	 = rb_ary_new();
+
+	VALUE asn_module	  	 = rb_const_get(rb_cObject, asn_module_id);
+	VALUE enumerize_module = rb_const_get(asn_module, asn_enumerize_module_id);
+
+	int i;
+
+	rb_extend_object(type_class, enumerize_module);
+
+	for (i = 0; i < specifics->map_count; i++)
+	{
+		VALUE elem = rb_ary_new();
+		asn_INTEGER_enum_map_t *enum_map = &specifics->value2enum[i];
+
+		
+		(void)rb_ary_push(elem, rb_str_new(enum_map->enum_name, enum_map->enum_len));
+		(void)rb_ary_push(elem, INT2FIX(enum_map->nat_value));
+
+		(void)rb_ary_push(params, elem);
+	}
+
+	rb_funcall(type_class, rb_intern("enumerize"), 1, params);
 
 	return type_class;
 }
@@ -251,6 +298,11 @@ set_encoder_and_decoder(VALUE schema_class, int base_type)
 		case ASN1_TYPE_CHOICE :
 			rb_define_singleton_method(schema_class, "encode", encode_choice, 2);
 			rb_define_singleton_method(schema_class, "decode", decode_choice, 2);
+			break;
+
+		case ASN1_TYPE_ENUMERATED :
+			rb_define_singleton_method(schema_class, "encode", encode_enumerated, 2);
+			rb_define_singleton_method(schema_class, "decode", decode_enumerated, 2);
 			break;
 
 		default :

@@ -12,8 +12,8 @@
 /*
  * Forward declarations
  */
-VALUE  encode_sequence_of(VALUE class, VALUE encoder, VALUE v);
-VALUE  decode_sequence_of(VALUE class, VALUE encoder, VALUE byte_string);
+VALUE  encode_enumerated(VALUE class, VALUE encoder, VALUE v);
+VALUE  decode_enumerated(VALUE class, VALUE encoder, VALUE byte_string);
 
 
 /*
@@ -21,20 +21,24 @@ VALUE  decode_sequence_of(VALUE class, VALUE encoder, VALUE byte_string);
  */
 extern VALUE  asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, void *object);
 extern void  *asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VALUE byte_string);
-extern void  *enstruct_sequence_of(asn_TYPE_descriptor_t *td, VALUE class, VALUE v);
-extern VALUE  unstruct_sequence_of(VALUE schema_class, char *buffer);
+extern char  *enstruct_enumerated(asn_TYPE_descriptor_t *td,  VALUE class, VALUE v);
+extern VALUE  unstruct_enumerated(VALUE schema_class, char *buffer);
+
+
 
 extern asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 
 /*
- * encode_sequence_of
+ * encode_enumerated
  */
 VALUE
-encode_sequence_of(VALUE class, VALUE encoder, VALUE v)
+encode_enumerated(VALUE class, VALUE encoder, VALUE v)
 {
 	asn_TYPE_descriptor_t *td = NULL;
 	void *s = NULL;
 	VALUE encoded;
+	VALUE selection;
+	int   i;
 
 	/*
 	 * 1. Find type descriptor associated with class
@@ -45,12 +49,18 @@ encode_sequence_of(VALUE class, VALUE encoder, VALUE v)
 	}
 
 	/*
-	 * 2. Create C struct equivalent of ruby object
+	 * 2. Get enumeration value
 	 */
-	s  = enstruct_sequence_of(td, class, v);
+	selection = rb_funcall(v, rb_intern("value"), 0, Qnil);
+	i = FIX2INT(selection);
 
 	/*
-	 * 3. Perform encoding to specified serialization format (i.e. BER, DER, PER or XML)
+	 * 3. Create C struct equivalent of ruby object
+	 */
+	s  = (void *)enstruct_enumerated(td, class, selection);
+
+	/*
+	 * 4. Perform encoding to specified serialization format (i.e. BER, DER, PER or XML)
 	 */
 	encoded	= asn1_encode_object(td, encoder, s);
 
@@ -58,13 +68,15 @@ encode_sequence_of(VALUE class, VALUE encoder, VALUE v)
 }
 
 VALUE
-decode_sequence_of(VALUE class, VALUE encoder, VALUE byte_string)
+decode_enumerated(VALUE class, VALUE encoder, VALUE byte_string)
 {
 	asn_TYPE_descriptor_t *td = NULL;
 
-	VALUE  v;
-	void  *st = NULL;
-	int	   length;
+	void *st = NULL;
+	char *str;
+	int	  length;
+
+	VALUE v;
 
 	td = asn1_get_td_from_schema(class);
 	if (td == NULL) {
@@ -76,10 +88,11 @@ decode_sequence_of(VALUE class, VALUE encoder, VALUE byte_string)
 	/*
 	 * Convert from asn1c structure to ruby object
 	 */
-	v = unstruct_sequence_of(class, (char *)st);
+	v = unstruct_enumerated(class, (char *)st);
 
 	/*
 	 * Hand to ruby
 	 */
 	return v;
 }
+

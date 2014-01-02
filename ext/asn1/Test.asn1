@@ -24,6 +24,12 @@ TestModel DEFINITIONS ::= BEGIN -- Module parameters preamble
 
   TestIntSequence ::= SEQUENCE OF INTEGER
 
+  TestEnumerated ::= ENUMERATED {
+    one,
+    two,
+    three
+  }
+
   TestSequence ::= SEQUENCE {
     str     UTF8String,
     testVar TestType

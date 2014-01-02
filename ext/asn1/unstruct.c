@@ -263,6 +263,28 @@ unstruct_choice(VALUE schema_class, char *buffer)
 
 
 /******************************************************************************/
+/* EUMERATED                                                                  */
+/******************************************************************************/
+VALUE
+unstruct_enumerated(VALUE schema_class, char *buffer)
+{
+	long val;
+	int  ret;
+
+	VALUE args	= rb_ary_new2(0);
+	VALUE class = rb_const_get(schema_class, rb_intern("CANDIDATE_TYPE"));
+	VALUE v     = rb_class_new_instance(0, &args, class);
+
+	INTEGER_t *integer = (INTEGER_t *)buffer;
+	ret = asn_INTEGER2long(integer, &val);
+
+	(void)rb_funcall(v, rb_intern("value="), 1, LONG2FIX(val));
+
+	return v;
+}
+
+
+/******************************************************************************/
 /* unstruct_struct_to_value													  */
 /******************************************************************************/
 void

@@ -26,14 +26,18 @@
 /******************************************************************************/
 /* Include files                                                              */
 /******************************************************************************/
-char  *enstruct_sequence(asn_TYPE_descriptor_t *td, VALUE class, VALUE v);
-void  *enstruct_member(VALUE v,    asn_TYPE_member_t *member, void *container);
-void  *enstruct_primitive(VALUE v, asn_TYPE_member_t *member, void *container);
-VALUE  enstruct_integer(VALUE v,   asn_TYPE_member_t *member, void *container);
-VALUE  enstruct_real(VALUE v,      asn_TYPE_member_t *member, void *container);
-VALUE  enstruct_boolean(VALUE v,   asn_TYPE_member_t *member, void *container);
-VALUE  enstruct_null(VALUE v,      asn_TYPE_member_t *member, void *container);
-VALUE  enstruct_ia5string(VALUE v, asn_TYPE_member_t *member, void *container);
+void  *enstruct_member(VALUE v,     asn_TYPE_member_t *member, void *container);
+void  *enstruct_primitive(VALUE v,  asn_TYPE_member_t *member, void *container);
+VALUE  enstruct_integer(VALUE v,    asn_TYPE_member_t *member, void *container);
+VALUE  enstruct_real(VALUE v,       asn_TYPE_member_t *member, void *container);
+VALUE  enstruct_boolean(VALUE v,    asn_TYPE_member_t *member, void *container);
+VALUE  enstruct_null(VALUE v,       asn_TYPE_member_t *member, void *container);
+VALUE  enstruct_ia5string(VALUE v,  asn_TYPE_member_t *member, void *container);
+
+char  *enstruct_enumerated(asn_TYPE_descriptor_t *td,  VALUE class, VALUE v);
+char  *enstruct_sequence(asn_TYPE_descriptor_t *td,    VALUE class, VALUE v);
+char  *enstruct_sequence_of(asn_TYPE_descriptor_t *td, VALUE class, VALUE v);
+
 
 void	 enstruct_value_to_struct(VALUE v, asn_TYPE_member_t *member, char *container);
 char	*enstruct_choice_value(asn_TYPE_descriptor_t *td, int id, VALUE value);
@@ -101,6 +105,11 @@ enstruct_primitive(VALUE v, asn_TYPE_member_t *member, void *container)
 			enstruct_null(v, member, container);
 			break;
 
+		case ASN1_TYPE_ENUMERATED :
+			rb_raise(rb_eStandardError, "Unimplemented");
+			/* enstruct_enumerated(v, member, container); */
+			break;
+
 		default :
 			rb_raise(rb_eStandardError, "Can't enstruct base type");
 			break;
@@ -124,7 +133,7 @@ enstruct_integer(VALUE v, asn_TYPE_member_t *member, void *container)
 		rb_raise(rb_eException, "Not an integer");
 	}
 
-	result = asn_long2INTEGER((REAL_t *)container, val);
+	result = asn_long2INTEGER((INTEGER_t *)container, val);
 
 	return Qnil;
 }
@@ -218,6 +227,21 @@ enstruct_ia5string(VALUE v, asn_TYPE_member_t *member, void *container)
 
 	return Qnil;
 }
+
+
+/******************************************************************************/
+/* ENUMERATED                                                                 */
+/******************************************************************************/
+char *
+enstruct_enumerated(asn_TYPE_descriptor_t *td, VALUE class, VALUE v)
+{
+	char *holding_struct = create_holding_struct(td->container_size);
+
+	enstruct_integer(v, NULL, holding_struct);
+
+	return holding_struct;
+}
+
 
 /******************************************************************************/
 /* SEQUENCE                                                                   */
