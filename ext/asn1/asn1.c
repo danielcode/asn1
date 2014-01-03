@@ -1,5 +1,11 @@
+/******************************************************************************/
+/* Include Files															  */
+/******************************************************************************/
 #include <ruby.h>
 
+/******************************************************************************/
+/* Externals																  */
+/******************************************************************************/
 extern VALUE traverse_type(VALUE class, VALUE name);
 extern VALUE define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol);
 
@@ -15,11 +21,18 @@ extern VALUE encode_ia5string(VALUE class, VALUE encoder, VALUE v);
 extern VALUE decode_ia5string(VALUE class, VALUE encoder, VALUE byte_string);
 
 
+/******************************************************************************/
+/* asn1_test																  */
+/******************************************************************************/
 static VALUE asn1_test(VALUE mod)
 {
   return rb_str_new2("Hello, world!");
 }
 
+
+/******************************************************************************/
+/* Init_asn1																  */
+/******************************************************************************/
 void Init_asn1()
 {
 	VALUE mAsn1, mError, cAsn1, cSchema, cType;

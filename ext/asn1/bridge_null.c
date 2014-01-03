@@ -1,12 +1,16 @@
+/******************************************************************************/
+/* Include Files															  */
+/******************************************************************************/
 #include <stdlib.h>
 #include <ruby.h>
 
 #include "asn_application.h"
 #include "NULL.h"
 
-/*
- * Forward declarations
- */
+
+/******************************************************************************/
+/* Forward declarations														  */
+/******************************************************************************/
 VALUE encode_null(VALUE class, VALUE encoder, VALUE v);
 VALUE decode_null(VALUE class, VALUE encoder, VALUE byte_string);
 
@@ -15,9 +19,10 @@ extern void  *asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VAL
 
 extern asn_TYPE_descriptor_t asn_DEF_NULL;
 
-/*
- * encode_null
- */
+
+/******************************************************************************/
+/* encode_null																  */
+/******************************************************************************/
 VALUE
 encode_null(VALUE class, VALUE encoder, VALUE v)
 {
@@ -36,6 +41,9 @@ encode_null(VALUE class, VALUE encoder, VALUE v)
 }
 
 
+/******************************************************************************/
+/* decode_null																  */
+/******************************************************************************/
 VALUE
 decode_null(VALUE class, VALUE encoder, VALUE byte_string)
 {

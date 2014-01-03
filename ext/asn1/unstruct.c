@@ -1,6 +1,6 @@
-/*
- *
- */
+/******************************************************************************/
+/* Include Files															  */
+/******************************************************************************/
 #include <stdlib.h>
 #include <ruby.h>
 #include <assert.h>
@@ -19,9 +19,10 @@
 #include "constr_CHOICE.h"
 #include "asn_SEQUENCE_OF.h"
 
-/*
- * Forward declarations
- */
+
+/******************************************************************************/
+/* Forward declarations														  */
+/******************************************************************************/
 VALUE unstruct_member(asn_TYPE_member_t *member, char *member_struct);
 VALUE unstruct_sequence(VALUE schema_class, char *buffer);
 VALUE unstruct_primitive(asn_TYPE_member_t *member, char *member_struct);
@@ -32,22 +33,26 @@ VALUE unstruct_boolean(  char *member_struct);
 VALUE unstruct_null(     char *member_struct);
 VALUE unstruct_ia5string(char *member_struct);
 
-VALUE unstruct_sequence(VALUE schema_class, char *buffer);
+VALUE unstruct_sequence(VALUE schema_class,    char *buffer);
 VALUE unstruct_sequence_of(VALUE schema_class, char *buffer);
-VALUE unstruct_choice(VALUE schema_class, char *buffer);
+VALUE unstruct_choice(VALUE schema_class,      char *buffer);
+
 void  unstruct_struct_to_value(asn_TYPE_member_t *member, VALUE v, char *buffer);
 
 int			 get_presentation_value(char *buffer, int offset, int pres_size);
 static char *setter_name_from_member_name(char *name);
 
-/*
- * Externals
- */
+
+/******************************************************************************/
+/* Externals																  */
+/******************************************************************************/
 extern asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 extern VALUE instance_of_undefined(void); 
 
 
-
+/******************************************************************************/
+/* unstruct_member															  */
+/******************************************************************************/
 VALUE
 unstruct_member(asn_TYPE_member_t *member, char *member_struct)
 {
@@ -63,6 +68,9 @@ unstruct_member(asn_TYPE_member_t *member, char *member_struct)
 }
 
 
+/******************************************************************************/
+/* unstruct_primitive														  */
+/******************************************************************************/
 VALUE
 unstruct_primitive(asn_TYPE_member_t *member, char *member_struct)
 {
@@ -100,7 +108,7 @@ unstruct_primitive(asn_TYPE_member_t *member, char *member_struct)
 
 
 /******************************************************************************/
-/* INTEGER                                                                    */
+/* INTEGER																	  */
 /******************************************************************************/
 VALUE
 unstruct_integer(char *member_struct)
@@ -116,7 +124,7 @@ unstruct_integer(char *member_struct)
 
 
 /******************************************************************************/
-/* REAL                                                                       */
+/* REAL																		  */
 /******************************************************************************/
 VALUE
 unstruct_real(char *member_struct)
@@ -132,7 +140,7 @@ unstruct_real(char *member_struct)
 
 
 /******************************************************************************/
-/* BOOLEAN                                                                    */
+/* BOOLEAN																	  */
 /******************************************************************************/
 VALUE
 unstruct_boolean(char *member_struct)
@@ -149,7 +157,7 @@ unstruct_boolean(char *member_struct)
 
 
 /******************************************************************************/
-/* NULL                                                                    */
+/* NULL																		  */
 /******************************************************************************/
 VALUE
 unstruct_null(char *member_struct)
@@ -159,7 +167,7 @@ unstruct_null(char *member_struct)
 
 
 /******************************************************************************/
-/* IA5String                                                                  */
+/* IA5String																  */
 /******************************************************************************/
 VALUE
 unstruct_ia5string(char *member_struct)
@@ -171,7 +179,7 @@ unstruct_ia5string(char *member_struct)
 
 
 /******************************************************************************/
-/* SEQUENCE                                                                   */
+/* SEQUENCE																	  */
 /******************************************************************************/
 VALUE
 unstruct_sequence(VALUE schema_class, char *buffer)
@@ -263,7 +271,7 @@ unstruct_choice(VALUE schema_class, char *buffer)
 
 
 /******************************************************************************/
-/* EUMERATED                                                                  */
+/* EUMERATED																  */
 /******************************************************************************/
 VALUE
 unstruct_enumerated(VALUE schema_class, char *buffer)
@@ -290,8 +298,8 @@ unstruct_enumerated(VALUE schema_class, char *buffer)
 void
 unstruct_struct_to_value(asn_TYPE_member_t *member, VALUE v, char *buffer)
 {
-	char  *member_struct;
 	char  *setter = setter_name_from_member_name(member->name);
+	char  *member_struct;
 	VALUE  member_val;
 
 	/*
@@ -346,8 +354,8 @@ setter_name_from_member_name(char *name)
 
 
 /******************************************************************************/
-/* get_presentation_value                                                     */
-/* XXXXX - broken; doesn't account for differing pres_size values             */
+/* get_presentation_value													  */
+/* XXXXX - broken; doesn't account for differing pres_size values			  */
 /******************************************************************************/
 int
 get_presentation_value(char *buffer, int offset, int pres_size)
@@ -357,4 +365,3 @@ get_presentation_value(char *buffer, int offset, int pres_size)
 
     return index - 1;
 }
-

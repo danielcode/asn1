@@ -1,3 +1,6 @@
+/******************************************************************************/
+/* Include Files															  */
+/******************************************************************************/
 #include <stdlib.h>
 #include <ruby.h>
 
@@ -6,9 +9,10 @@
 
 #include "util.h"
 
-/*
- * Forward declarations
- */
+
+/******************************************************************************/
+/* Forward declarations														  */
+/******************************************************************************/
 VALUE encode_ia5string(VALUE class, VALUE encoder, VALUE v);
 VALUE decode_ia5string(VALUE class, VALUE encoder, VALUE byte_string);
 
@@ -19,6 +23,10 @@ extern OCTET_STRING_t *OCTET_STRING_new_fromBuf(asn_TYPE_descriptor_t *td, const
 
 extern asn_TYPE_descriptor_t asn_DEF_IA5String;
 
+
+/******************************************************************************/
+/* encode_ia5string														  	  */
+/******************************************************************************/
 VALUE
 encode_ia5string(VALUE class, VALUE encoder, VALUE v)
 {
@@ -57,6 +65,10 @@ encode_ia5string(VALUE class, VALUE encoder, VALUE v)
 	return encoded;
 }
 
+
+/******************************************************************************/
+/* decode_ia5string														  	  */
+/******************************************************************************/
 VALUE
 decode_ia5string(VALUE class, VALUE encoder, VALUE byte_string)
 {

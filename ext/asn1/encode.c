@@ -1,28 +1,29 @@
-/*
- *
- */
+/******************************************************************************/
+/* Include Files															  */
+/******************************************************************************/
 #include <stdlib.h>
 #include <ruby.h>
 #include "asn_application.h"
 #include "util.h"
 
 
-/*
- * Forward declarations
- */
+/******************************************************************************/
+/* Forward declarations														  */
+/******************************************************************************/
 VALUE  asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, void *object);
 void  *asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VALUE byte_string);
 char  *encoder_string(VALUE encoder);
 
-/*
- * Externals
- */
+
+/******************************************************************************/
+/* Externals																  */
+/******************************************************************************/
 extern int   consumeBytes(const void *buffer, size_t size, void *application_specific_key);
 
 
-/*
- * asn1_encode_object
- */
+/******************************************************************************/
+/* asn1_encode_object														  */
+/******************************************************************************/
 VALUE
 asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, void *object)
 {
@@ -66,9 +67,10 @@ asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, void *object)
 	return encoded;
 }
 
-/*
- * asn1_decode_object
- */
+
+/******************************************************************************/
+/* asn1_decode_object														  */
+/******************************************************************************/
 void *
 asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VALUE byte_string)
 {
@@ -111,6 +113,10 @@ asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VALUE byte_string
 	return st;
 }
 
+
+/******************************************************************************/
+/* encoder_string															  */
+/******************************************************************************/
 char *
 encoder_string(VALUE encoder)
 {

@@ -1,6 +1,6 @@
-/*
- *
- */
+/******************************************************************************/
+/* Include Files															  */
+/******************************************************************************/
 #include <stdlib.h>
 #include <ruby.h>
 
@@ -9,28 +9,29 @@
 
 #include "util.h"
 
-/*
- * Forward declarations
- */
+
+/******************************************************************************/
+/* Forward declarations														  */
+/******************************************************************************/
 VALUE  encode_choice(VALUE class, VALUE encoder, VALUE v);
 VALUE  decode_choice(VALUE class, VALUE encoder, VALUE byte_string);
 
 
-/*
- * Externals
- */
+/******************************************************************************/
+/* Externals																  */
+/******************************************************************************/
 extern VALUE  asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, void *object);
 extern void  *asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VALUE byte_string);
 extern void  *enstruct_sequence(asn_TYPE_descriptor_t *td, VALUE class, VALUE v);
 extern void  *enstruct_choice(asn_TYPE_descriptor_t *td, VALUE class, VALUE v);
 extern VALUE  unstruct_choice(VALUE schema_class, char *buffer);
 
-
 extern asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 
-/*
- * encode_choice
- */
+
+/******************************************************************************/
+/* encode_choice															  */
+/******************************************************************************/
 VALUE
 encode_choice(VALUE class, VALUE encoder, VALUE v)
 {
@@ -59,6 +60,10 @@ encode_choice(VALUE class, VALUE encoder, VALUE v)
 	return encoded;
 }
 
+
+/******************************************************************************/
+/* decode_choice															  */
+/******************************************************************************/
 VALUE
 decode_choice(VALUE class, VALUE encoder, VALUE byte_string)
 {
@@ -87,4 +92,3 @@ decode_choice(VALUE class, VALUE encoder, VALUE byte_string)
 	 */
 	return v;
 }
-

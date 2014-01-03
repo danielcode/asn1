@@ -1,6 +1,6 @@
-/*
- *
- */
+/******************************************************************************/
+/* Include Files															  */
+/******************************************************************************/
 #include <stdlib.h>
 #include <ruby.h>
 
@@ -9,16 +9,17 @@
 
 #include "util.h"
 
-/*
- * Forward declarations
- */
+
+/******************************************************************************/
+/* Forward declarations														  */
+/******************************************************************************/
 VALUE  encode_sequence_of(VALUE class, VALUE encoder, VALUE v);
 VALUE  decode_sequence_of(VALUE class, VALUE encoder, VALUE byte_string);
 
 
-/*
- * Externals
- */
+/******************************************************************************/
+/* Externals																  */
+/******************************************************************************/
 extern VALUE  asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, void *object);
 extern void  *asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VALUE byte_string);
 extern void  *enstruct_sequence_of(asn_TYPE_descriptor_t *td, VALUE class, VALUE v);
@@ -26,9 +27,10 @@ extern VALUE  unstruct_sequence_of(VALUE schema_class, char *buffer);
 
 extern asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 
-/*
- * encode_sequence_of
- */
+
+/******************************************************************************/
+/* encode_sequence_of														  */
+/******************************************************************************/
 VALUE
 encode_sequence_of(VALUE class, VALUE encoder, VALUE v)
 {
@@ -57,6 +59,10 @@ encode_sequence_of(VALUE class, VALUE encoder, VALUE v)
 	return encoded;
 }
 
+
+/******************************************************************************/
+/* decode_sequence															  */
+/******************************************************************************/
 VALUE
 decode_sequence_of(VALUE class, VALUE encoder, VALUE byte_string)
 {

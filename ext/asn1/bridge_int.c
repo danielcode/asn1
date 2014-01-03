@@ -1,12 +1,16 @@
+/******************************************************************************/
+/* Include Files															  */
+/******************************************************************************/
 #include <stdlib.h>
 #include <ruby.h>
 
 #include "asn_application.h"
 #include "INTEGER.h"
 
-/*
- * Forward declarations
- */
+
+/******************************************************************************/
+/* Forward declarations														  */
+/******************************************************************************/
 VALUE encode_int(VALUE class, VALUE encoder, VALUE v);
 VALUE decode_int(VALUE class, VALUE encoder, VALUE byte_string);
 
@@ -15,10 +19,11 @@ extern void  *asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VAL
 
 extern asn_TYPE_descriptor_t asn_DEF_INTEGER;
 
-/*
- * encode_int
- * Convert a ruby FIXNUM to the nominated encoding.
- */
+
+/******************************************************************************/
+/* encode_int																  */
+/* Convert a ruby FIXNUM to the nominated encoding.							  */
+/******************************************************************************/
 VALUE
 encode_int(VALUE class, VALUE encoder, VALUE v)
 {
@@ -49,6 +54,10 @@ encode_int(VALUE class, VALUE encoder, VALUE v)
 	return asn1_encode_object(&asn_DEF_INTEGER, encoder, &st);
 }
 
+
+/******************************************************************************/
+/* decode_int																  */
+/******************************************************************************/
 VALUE
 decode_int(VALUE class, VALUE encoder, VALUE byte_string)
 {

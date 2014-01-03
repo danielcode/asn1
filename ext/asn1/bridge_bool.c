@@ -15,10 +15,10 @@ extern void  *asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VAL
 
 extern asn_TYPE_descriptor_t asn_DEF_BOOLEAN;
 
-/*
- * encode_bool
- * Convert a ruby FIXNUM to the nominated encoding.
- */
+/******************************************************************************/
+/* encode_bool																  */
+/* Convert a ruby FIXNUM to the nominated encoding.							  */
+/******************************************************************************/
 VALUE
 encode_boolean(VALUE class, VALUE encoder, VALUE v)
 {
@@ -51,6 +51,9 @@ encode_boolean(VALUE class, VALUE encoder, VALUE v)
 }
 
 
+/******************************************************************************/
+/* decode_bool																  */
+/******************************************************************************/
 VALUE
 decode_boolean(VALUE class, VALUE encoder, VALUE byte_string)
 {

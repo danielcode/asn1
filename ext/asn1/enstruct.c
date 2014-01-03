@@ -1,9 +1,5 @@
-/*
- *
- */
-
 /******************************************************************************/
-/* Include files                                                              */
+/* Include files															  */
 /******************************************************************************/
 #include <stdlib.h>
 #include <assert.h>
@@ -23,8 +19,9 @@
 #include "constr_CHOICE.h"
 #include "asn_SEQUENCE_OF.h"
 
+
 /******************************************************************************/
-/* Include files                                                              */
+/* Forward declarations														  */
 /******************************************************************************/
 void  *enstruct_member(VALUE v,     asn_TYPE_member_t *member, void *container);
 void  *enstruct_primitive(VALUE v,  asn_TYPE_member_t *member, void *container);
@@ -38,7 +35,6 @@ char  *enstruct_enumerated(asn_TYPE_descriptor_t *td,  VALUE class, VALUE v);
 char  *enstruct_sequence(asn_TYPE_descriptor_t *td,    VALUE class, VALUE v);
 char  *enstruct_sequence_of(asn_TYPE_descriptor_t *td, VALUE class, VALUE v);
 
-
 void	 enstruct_value_to_struct(VALUE v, asn_TYPE_member_t *member, char *container);
 char	*enstruct_choice_value(asn_TYPE_descriptor_t *td, int id, VALUE value);
 
@@ -50,17 +46,17 @@ void		 set_presentation_value(char *holding_struct, int pres_offset, int pres_si
 
 
 /******************************************************************************/
-/* Include files                                                              */
+/* Externals																  */
 /******************************************************************************/
 extern asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 extern int		is_undefined(VALUE v, int base_type);
 extern VALUE	get_optional_value(VALUE v, asn_TYPE_member_t *member);
 
 
-/*
- * enstruct_member
- * Returns C struct equivalent of corresponding ruby object
- */
+/******************************************************************************/
+/* enstruct_member															  */
+/* Returns C struct equivalent of corresponding ruby object					  */
+/******************************************************************************/
 void *
 enstruct_member(VALUE v, asn_TYPE_member_t *member, void *container)
 {
@@ -75,9 +71,9 @@ enstruct_member(VALUE v, asn_TYPE_member_t *member, void *container)
 }
 
 
-/*
- * enstruct_primitive
- */
+/******************************************************************************/
+/* enstruct_primitive														  */
+/******************************************************************************/
 void *
 enstruct_primitive(VALUE v, asn_TYPE_member_t *member, void *container)
 {
@@ -120,7 +116,7 @@ enstruct_primitive(VALUE v, asn_TYPE_member_t *member, void *container)
 
 
 /******************************************************************************/
-/* INTEGER                                                                    */
+/* INTEGER																	  */
 /******************************************************************************/
 VALUE
 enstruct_integer(VALUE v, asn_TYPE_member_t *member, void *container)
@@ -140,7 +136,7 @@ enstruct_integer(VALUE v, asn_TYPE_member_t *member, void *container)
 
 
 /******************************************************************************/
-/* REAL                                                                       */
+/* REAL																		  */
 /******************************************************************************/
 VALUE
 enstruct_real(VALUE v, asn_TYPE_member_t *member, void *container)
@@ -160,8 +156,9 @@ enstruct_real(VALUE v, asn_TYPE_member_t *member, void *container)
 	return Qnil;
 }
 
+
 /******************************************************************************/
-/* BOOLEAN                                                                    */
+/* BOOLEAN																	  */
 /******************************************************************************/
 VALUE
 enstruct_boolean(VALUE v, asn_TYPE_member_t *member, void *container)
@@ -184,8 +181,9 @@ enstruct_boolean(VALUE v, asn_TYPE_member_t *member, void *container)
 	return Qnil;
 }
 
+
 /******************************************************************************/
-/* NULL                                                                       */
+/* NULL																		  */
 /******************************************************************************/
 VALUE
 enstruct_null(VALUE v, asn_TYPE_member_t *member, void *container)
@@ -202,9 +200,10 @@ enstruct_null(VALUE v, asn_TYPE_member_t *member, void *container)
 	return Qnil;
 }
 
+
 /******************************************************************************/
-/* IA5String                                                                  */
-/* Note: assuming OCTET_STRING is constant length                             */
+/* IA5String																  */
+/* Note: assuming OCTET_STRING is constant length							  */
 /******************************************************************************/
 VALUE
 enstruct_ia5string(VALUE v, asn_TYPE_member_t *member, void *container)
@@ -230,7 +229,7 @@ enstruct_ia5string(VALUE v, asn_TYPE_member_t *member, void *container)
 
 
 /******************************************************************************/
-/* ENUMERATED                                                                 */
+/* ENUMERATED																  */
 /******************************************************************************/
 char *
 enstruct_enumerated(asn_TYPE_descriptor_t *td, VALUE class, VALUE v)
@@ -244,10 +243,10 @@ enstruct_enumerated(asn_TYPE_descriptor_t *td, VALUE class, VALUE v)
 
 
 /******************************************************************************/
-/* SEQUENCE                                                                   */
+/* SEQUENCE																	  */
 /* Encode elements of sequence												  */
-/* XXXXX - assert that TD is a sequence.                                      */
-/* XXXXX - class might not be required.                                       */
+/* XXXXX - assert that TD is a sequence.									  */
+/* XXXXX - class might not be required.										  */
 /******************************************************************************/
 char *
 enstruct_sequence(asn_TYPE_descriptor_t *td, VALUE class, VALUE sequence)
@@ -276,9 +275,9 @@ enstruct_sequence(asn_TYPE_descriptor_t *td, VALUE class, VALUE sequence)
 /******************************************************************************/
 /* SEQUENCE_OF																  */
 /* Encode items in a SEQUENCE_OF											  */
-/* XXXXX - assert that TD is a sequence.                                      */
+/* XXXXX - assert that TD is a sequence.									  */
 /* XXXXX - assert sequence_of is an array (or enumerable)					  */
-/* XXXXX - class might not be required.                                       */
+/* XXXXX - class might not be required.										  */
 /* XXXXX - reference elements via "list"									  */
 /******************************************************************************/
 char *
@@ -312,8 +311,8 @@ enstruct_sequence_of(asn_TYPE_descriptor_t *td, VALUE class, VALUE sequence_of)
 
 
 /******************************************************************************/
-/* CHOICE                                                                     */
-/* XXXXX - Assert we have a CHOICE                                            */
+/* CHOICE																	  */
+/* XXXXX - Assert we have a CHOICE											  */
 /******************************************************************************/
 char *
 enstruct_choice(asn_TYPE_descriptor_t *td, VALUE class, VALUE choice)
@@ -350,7 +349,7 @@ enstruct_choice_value(asn_TYPE_descriptor_t *td, int id, VALUE value)
 
 
 /******************************************************************************/
-/* enstruct_value_to_struct                                                   */
+/* enstruct_value_to_struct													  */
 /******************************************************************************/
 void
 enstruct_value_to_struct(VALUE v, asn_TYPE_member_t *member, char *container)
@@ -381,8 +380,8 @@ enstruct_value_to_struct(VALUE v, asn_TYPE_member_t *member, char *container)
 
 
 /******************************************************************************/
-/* create_holding_struct                                                      */
-/* Create a new C struct we'll use to hold data                               */
+/* create_holding_struct													  */
+/* Create a new C struct we'll use to hold data								  */
 /******************************************************************************/
 static char *
 create_holding_struct(int size)
@@ -395,6 +394,7 @@ create_holding_struct(int size)
 
 	return holding_struct;
 }
+
 
 /******************************************************************************/
 /* get_id_of_choice															  */
@@ -410,7 +410,7 @@ get_id_of_choice(asn_TYPE_descriptor_t *td, VALUE choice_value_sym)
 	choice_str = rb_funcall(choice_value_sym, rb_intern("to_s"), 0, rb_ary_new2(0));
 
 	/*
-	 * 2. Match 
+	 * Match 
 	 */
 	if (choice_str == Qnil)
 	{
@@ -440,7 +440,7 @@ get_id_of_choice(asn_TYPE_descriptor_t *td, VALUE choice_value_sym)
 
 /******************************************************************************/
 /* get_choice_value_sym														  */
-/* Get the symbol of the choice's value.            						  */
+/* Get the symbol of the choice's value.									  */
 /******************************************************************************/
 VALUE
 get_choice_value_sym(VALUE choice)
@@ -450,7 +450,7 @@ get_choice_value_sym(VALUE choice)
 
 
 /******************************************************************************/
-/* get_choice_value    														  */
+/* get_choice_value															  */
 /* Get the value of the choice												  */
 /******************************************************************************/
 VALUE

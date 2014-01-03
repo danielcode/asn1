@@ -1,12 +1,15 @@
+/******************************************************************************/
+/* Include Files															  */
+/******************************************************************************/
 #include <stdlib.h>
 #include <ruby.h>
 
 #include "asn_application.h"
 #include "REAL.h"
 
-/*
- * Forward declarations
- */
+/******************************************************************************/
+/* Forward declarations														  */
+/******************************************************************************/
 VALUE encode_real(VALUE class, VALUE encoder, VALUE v);
 VALUE decode_real(VALUE class, VALUE encoder, VALUE byte_string);
 
@@ -15,10 +18,11 @@ extern void  *asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VAL
 
 extern asn_TYPE_descriptor_t asn_DEF_REAL;
 
-/*
- * encode_real
- * Convert a ruby FLOAT to the nominated encoding.
- */
+
+/******************************************************************************/
+/* encode_real																  */
+/* Convert a ruby FLOAT to the nominated encoding.							  */
+/******************************************************************************/
 VALUE
 encode_real(VALUE class, VALUE encoder, VALUE v)
 {
@@ -48,6 +52,10 @@ encode_real(VALUE class, VALUE encoder, VALUE v)
 	return asn1_encode_object(&asn_DEF_REAL, encoder, &st);
 }
 
+
+/******************************************************************************/
+/* decode_real																  */
+/******************************************************************************/
 VALUE
 decode_real(VALUE class, VALUE encoder, VALUE byte_string)
 {
