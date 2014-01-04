@@ -8,6 +8,8 @@
 /******************************************************************************/
 extern VALUE traverse_type(VALUE class, VALUE name);
 extern VALUE define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol);
+extern VALUE define_type_from_ruby(VALUE class, VALUE schema_root, VALUE type_root, VALUE symbol);
+
 
 extern VALUE encode_int(VALUE class, VALUE encoder, VALUE v);
 extern VALUE decode_int(VALUE class, VALUE encoder, VALUE byte_string);
@@ -42,7 +44,6 @@ void Init_asn1()
 	 */
 	cAsn1 = rb_define_class_under(mAsn1, "Asn1", rb_cObject);
 	rb_define_singleton_method(cAsn1, "traverse_type",  traverse_type, 1);
-	rb_define_singleton_method(cAsn1, "define_classes", define_type, 2);
 
 
 	/******************************************************************************/
@@ -57,6 +58,7 @@ void Init_asn1()
 	/******************************************************************************/
 	cSchema = rb_define_class_under(mAsn1, "Schema", rb_cObject);
 	rb_define_const(cSchema, "SYMBOL_TO_SCHEMA", cSymbolToSchema);
+	rb_define_singleton_method(cSchema, "define_type", define_type_from_ruby, 3);
 
 
 	/******************************************************************************/
@@ -69,11 +71,13 @@ void Init_asn1()
 	/******************************************************************************/
 	/* Structured Types															  */
 	/******************************************************************************/
+	/*
 	cNewType		 = define_type(cSchema, cType, "asn_DEF_SimpleSequence");
 	cTestChoice		 = define_type(cSchema, cType, "asn_DEF_TestChoice");
 	cTestIntSequence = define_type(cSchema, cType, "asn_DEF_TestIntSequence");
 	cTestEnumerated	 = define_type(cSchema, cType, "asn_DEF_TestEnumerated");
 	cTestNested		 = define_type(cSchema, cType, "asn_DEF_TestNested");
+	*/
 
 
 	/******************************************************************************/

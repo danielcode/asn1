@@ -20,7 +20,8 @@ asn_TYPE_descriptor_t *get_type_descriptor(const char *name);
 VALUE   traverse_type(VALUE class, VALUE name);
 VALUE   _traverse_type(asn_TYPE_descriptor_t *td);
 VALUE	create_attribute_hash(struct asn_TYPE_member_s *element);
-void	define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol);
+VALUE	define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol);
+VALUE	define_type_from_ruby(VALUE class, VALUE schema_root, VALUE type_root, VALUE symbol);
 VALUE	define_sequence(VALUE type_root, asn_TYPE_descriptor_t *td);
 VALUE	define_sequence_of(VALUE type_root, asn_TYPE_descriptor_t *td);
 VALUE	define_choice(VALUE type_root, asn_TYPE_descriptor_t *td);
@@ -56,7 +57,7 @@ extern VALUE decode_enumerated(VALUE class, VALUE encoder, VALUE byte_string);
 /* Returns a ruby class associated with a corresponding ASN.1 type            */
 /* XXXXX - need to handle recursively defined types                           */
 /******************************************************************************/
-void
+VALUE
 define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol)
 {
 	int   i;
@@ -105,11 +106,24 @@ define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol)
 	 */
 	symbol_to_schema = rb_const_get(schema_root, rb_intern("SYMBOL_TO_SCHEMA"));
 	rb_hash_aset(symbol_to_schema, rb_str_new2(descriptor_symbol), schema_class);
+
+	return schema_class;
 }
 
 
 /******************************************************************************/
-/* define_seqeuence                                                           */
+/* define_type_from_ruby													  */
+/******************************************************************************/
+VALUE
+define_type_from_ruby(VALUE class, VALUE schema_root, VALUE type_root, VALUE symbol)
+{
+	char  *symbol_str = RSTRING_PTR(symbol);
+	return define_type(schema_root, type_root, symbol_str);
+}
+
+
+/******************************************************************************/
+/* define_sequence                                                           */
 /******************************************************************************/
 VALUE
 define_sequence(VALUE type_root, asn_TYPE_descriptor_t *td)
