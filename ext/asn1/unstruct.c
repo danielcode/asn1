@@ -18,29 +18,28 @@
 #include "OCTET_STRING.h"
 #include "constr_CHOICE.h"
 #include "asn_SEQUENCE_OF.h"
+#include "ENUMERATED.h"
 
 
 /******************************************************************************/
 /* Forward declarations														  */
 /******************************************************************************/
-VALUE unstruct_member(asn_TYPE_member_t *member, char *member_struct);
-VALUE unstruct_sequence(VALUE schema_class, char *buffer);
-VALUE unstruct_primitive(asn_TYPE_member_t *member, char *member_struct);
+VALUE unstruct_object(asn_TYPE_descriptor_t *td,		char *container);
 
-VALUE unstruct_integer(  char *member_struct);
-VALUE unstruct_real(     char *member_struct);
-VALUE unstruct_boolean(  char *member_struct);
-VALUE unstruct_null(     char *member_struct);
-VALUE unstruct_ia5string(char *member_struct);
+VALUE unstruct_integer(asn_TYPE_descriptor_t *td,		char *container);
+VALUE unstruct_real(asn_TYPE_descriptor_t *td,			char *container);
+VALUE unstruct_boolean(asn_TYPE_descriptor_t *td,		char *container);
+VALUE unstruct_null(asn_TYPE_descriptor_t *td,			char *container);
+VALUE unstruct_ia5string(asn_TYPE_descriptor_t *td,		char *container);
 
-VALUE unstruct_sequence(VALUE schema_class,    char *buffer);
-VALUE unstruct_sequence_of(VALUE schema_class, char *buffer);
-VALUE unstruct_choice(VALUE schema_class,      char *buffer);
-VALUE unstruct_enumerated(VALUE schema_class,  char *buffer);
+VALUE unstruct_sequence(asn_TYPE_descriptor_t *td,		char *container);
+VALUE unstruct_sequence_of(asn_TYPE_descriptor_t *td,	char *container);
+VALUE unstruct_choice(asn_TYPE_descriptor_t *td,		char *container);
+VALUE unstruct_enumerated(asn_TYPE_descriptor_t *td,	char *container);
 
-void  unstruct_struct_to_value(asn_TYPE_member_t *member, VALUE v, char *buffer);
+void  unstruct_member(VALUE v, asn_TYPE_member_t *member, char *buffer);
 
-int			 get_presentation_value(char *buffer, int offset, int pres_size);
+int	get_presentation_value(char *buffer, int offset, int pres_size);
 static char *setter_name_from_member_name(char *name);
 
 
@@ -49,54 +48,41 @@ static char *setter_name_from_member_name(char *name);
 /******************************************************************************/
 extern asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 extern VALUE instance_of_undefined(void); 
+extern VALUE get_schema_from_td_string(char *symbol);
 
 
 /******************************************************************************/
-/* unstruct_member															  */
-/******************************************************************************/
-VALUE
-unstruct_member(asn_TYPE_member_t *member, char *member_struct)
-{
-	if (member->type->generated == 0)
-	{
-		return unstruct_primitive(member, member_struct);
-	}
-	else
-	{
-		return Qnil; /* XXXXX */
-		/* Constructed type */
-	}
-}
-
-
-/******************************************************************************/
-/* unstruct_primitive														  */
+/* unstruct_object															  */
 /******************************************************************************/
 VALUE
-unstruct_primitive(asn_TYPE_member_t *member, char *member_struct)
+unstruct_object(asn_TYPE_descriptor_t *td, char *container)
 {
 	VALUE v;
 
-	switch(member->type->base_type)
+	switch(td->base_type)
 	{
 		case ASN1_TYPE_INTEGER :
-			v = unstruct_integer(member_struct);
+			v = unstruct_integer(td, container);
 			break;
 
 		case ASN1_TYPE_IA5String :
-			v = unstruct_ia5string(member_struct);
+			v = unstruct_ia5string(td, container);
 			break;
 
 		case ASN1_TYPE_REAL :
-			v = unstruct_real(member_struct);
+			v = unstruct_real(td, container);
 			break;
 
 		case ASN1_TYPE_BOOLEAN :
-			v = unstruct_boolean(member_struct);
+			v = unstruct_boolean(td, container);
 			break;
 
 		case ASN1_TYPE_NULL :
-			v = unstruct_null(member_struct);
+			v = unstruct_null(td, container);
+			break;
+
+		case ASN1_TYPE_SEQUENCE :
+			v = unstruct_sequence(td, container);
 			break;
 
 		default :
@@ -112,12 +98,12 @@ unstruct_primitive(asn_TYPE_member_t *member, char *member_struct)
 /* INTEGER																	  */
 /******************************************************************************/
 VALUE
-unstruct_integer(char *member_struct)
+unstruct_integer(asn_TYPE_descriptor_t *td, char *container)
 {
 	long val;
 	int  ret;
 
-	INTEGER_t *integer = (INTEGER_t *)member_struct;
+	INTEGER_t *integer = (INTEGER_t *)container;
 	ret = asn_INTEGER2long(integer, &val);
 
 	return INT2FIX(val);
@@ -128,12 +114,12 @@ unstruct_integer(char *member_struct)
 /* REAL																		  */
 /******************************************************************************/
 VALUE
-unstruct_real(char *member_struct)
+unstruct_real(asn_TYPE_descriptor_t *td, char *container)
 {
 	double	val;
 	int		ret;
 
-	REAL_t *real = (REAL_t *)member_struct;
+	REAL_t *real = (REAL_t *)container;
 	ret = asn_REAL2double(real, &val);
 
 	return rb_float_new(val);
@@ -144,9 +130,9 @@ unstruct_real(char *member_struct)
 /* BOOLEAN																	  */
 /******************************************************************************/
 VALUE
-unstruct_boolean(char *member_struct)
+unstruct_boolean(asn_TYPE_descriptor_t *td, char *container)
 {
-	BOOLEAN_t *bool = (BOOLEAN_t *)member_struct;
+	BOOLEAN_t *bool = (BOOLEAN_t *)container;
 
 	if (*bool == 0)
 	{
@@ -161,7 +147,7 @@ unstruct_boolean(char *member_struct)
 /* NULL																		  */
 /******************************************************************************/
 VALUE
-unstruct_null(char *member_struct)
+unstruct_null(asn_TYPE_descriptor_t *td, char *container)
 {
 	return Qnil;
 }
@@ -171,9 +157,9 @@ unstruct_null(char *member_struct)
 /* IA5String																  */
 /******************************************************************************/
 VALUE
-unstruct_ia5string(char *member_struct)
+unstruct_ia5string(asn_TYPE_descriptor_t *td, char *container)
 {
-	IA5String_t *ia5string = (IA5String_t *)member_struct;
+	IA5String_t *ia5string = (IA5String_t *)container;
 
 	return rb_str_new(ia5string->buf, ia5string->size);
 }
@@ -183,24 +169,20 @@ unstruct_ia5string(char *member_struct)
 /* SEQUENCE																	  */
 /******************************************************************************/
 VALUE
-unstruct_sequence(VALUE schema_class, char *buffer)
+unstruct_sequence(asn_TYPE_descriptor_t *td, char *container)
 {
-	VALUE args = rb_ary_new2(0);
-	int	  i;
+	VALUE schema_class = get_schema_from_td_string(td->symbol);
 
-	asn_TYPE_descriptor_t *td = asn1_get_td_from_schema(schema_class);
-
+	VALUE args	= rb_ary_new2(0);
 	VALUE class = rb_const_get(schema_class, rb_intern("CANDIDATE_TYPE"));
 	VALUE v     = rb_class_new_instance(0, &args, class);
+	int	  i;
 
-	/*
-	 *
-	 */
 	for (i = 0; i < td->elements_count; i++)
 	{
 		asn_TYPE_member_t *member = (asn_TYPE_member_t *)&td->elements[i];
 
-		unstruct_struct_to_value(member, v, buffer);
+		unstruct_member(v, member, container);
 	}
 
 	return v;
@@ -211,33 +193,28 @@ unstruct_sequence(VALUE schema_class, char *buffer)
 /* SEQUENCE_OF																  */
 /******************************************************************************/
 VALUE
-unstruct_sequence_of(VALUE schema_class, char *buffer)
+unstruct_sequence_of(asn_TYPE_descriptor_t *td, char *container)
 {
+	VALUE schema_class = get_schema_from_td_string(td->symbol);
+
 	VALUE  args	= rb_ary_new2(0);
 	VALUE class = rb_const_get(schema_class, rb_intern("CANDIDATE_TYPE"));
 	VALUE v     = rb_class_new_instance(0, &args, class);
 
-	asn_anonymous_sequence_ *sequence_of = (asn_anonymous_sequence_ *)buffer;
-	asn_TYPE_descriptor_t	*td			 = asn1_get_td_from_schema(schema_class);
+	asn_anonymous_sequence_ *sequence_of = (asn_anonymous_sequence_ *)container;
 	asn_TYPE_member_t		*member		 = td->elements;
 
 	int	  i;
 	int	  length = sequence_of->count;
-
-/*
-	VALUE class_name = rb_funcall(class, rb_intern("to_s"), 0);
-	char *check = RSTRING_PTR(class_name);
-*/
-
 
 	/*
 	 *
 	 */
 	for (i = 0; i < length; i++)
 	{
-		VALUE element;
-		char *element_buffer = (char *)sequence_of->array[i];
-		element = unstruct_member(member, element_buffer);
+		char  *element_buffer = (char *)sequence_of->array[i];
+		VALUE  element		  = unstruct_object(member->type, element_buffer);
+
 		rb_funcall(v, rb_intern("push"), 1, element);
 	}
 
@@ -249,17 +226,18 @@ unstruct_sequence_of(VALUE schema_class, char *buffer)
 /* CHOICE																	  */
 /******************************************************************************/
 VALUE
-unstruct_choice(VALUE schema_class, char *buffer)
+unstruct_choice(asn_TYPE_descriptor_t *td, char *container)
 {
+	VALUE schema_class = get_schema_from_td_string(td->symbol);
+
 	VALUE  args	  = rb_ary_new2(0);
 	VALUE  choice;
 	int	   index;
 
-	asn_TYPE_descriptor_t  *td		  = asn1_get_td_from_schema(schema_class);
     asn_CHOICE_specifics_t *specifics = (asn_CHOICE_specifics_t *)td->specifics;
 	asn_TYPE_member_t	   *member;
 
-	index  = get_presentation_value(buffer, specifics->pres_offset, specifics->pres_size);
+	index  = get_presentation_value(container, specifics->pres_offset, specifics->pres_size);
 	member = (asn_TYPE_member_t *)&td->elements[index];
 
 	VALUE class = rb_const_get(schema_class, rb_intern("CANDIDATE_TYPE"));
@@ -268,7 +246,7 @@ unstruct_choice(VALUE schema_class, char *buffer)
 	/*
 	 * asn1_choice_value
 	 */
-	unstruct_struct_to_value(member, v, buffer);
+	unstruct_member(v, member, container);
 
 	choice = ID2SYM(rb_intern(member->name));
 	(void)rb_funcall(v, rb_intern("asn1_choice_value="), 1, choice);
@@ -281,8 +259,10 @@ unstruct_choice(VALUE schema_class, char *buffer)
 /* EUMERATED																  */
 /******************************************************************************/
 VALUE
-unstruct_enumerated(VALUE schema_class, char *buffer)
+unstruct_enumerated(asn_TYPE_descriptor_t *td, char *container)
 {
+	VALUE schema_class = get_schema_from_td_string(td->symbol);
+
 	long val;
 	int  ret;
 
@@ -290,7 +270,7 @@ unstruct_enumerated(VALUE schema_class, char *buffer)
 	VALUE class = rb_const_get(schema_class, rb_intern("CANDIDATE_TYPE"));
 	VALUE v     = rb_class_new_instance(0, &args, class);
 
-	INTEGER_t *integer = (INTEGER_t *)buffer;
+	INTEGER_t *integer = (INTEGER_t *)container;
 	ret = asn_INTEGER2long(integer, &val);
 
 	(void)rb_funcall(v, rb_intern("value="), 1, LONG2FIX(val));
@@ -300,10 +280,10 @@ unstruct_enumerated(VALUE schema_class, char *buffer)
 
 
 /******************************************************************************/
-/* unstruct_struct_to_value													  */
+/* unstruct_member													  */
 /******************************************************************************/
 void
-unstruct_struct_to_value(asn_TYPE_member_t *member, VALUE v, char *buffer)
+unstruct_member(VALUE v, asn_TYPE_member_t *member, char *container)
 {
 	char  *setter = setter_name_from_member_name(member->name);
 	char  *member_struct;
@@ -314,16 +294,19 @@ unstruct_struct_to_value(asn_TYPE_member_t *member, VALUE v, char *buffer)
 	 */
 	if (member->flags & ATF_POINTER)
 	{
-		char **p1 = (char **)(buffer + member->memb_offset);
+		char **p1 = (char **)(container + member->memb_offset);
 		member_struct = *p1;
 	}
 	else
 	{
-		member_struct = buffer + member->memb_offset;
+		member_struct = container + member->memb_offset;
 	}
 
 	if (member_struct == NULL)
 	{
+		/*
+		 * Deal with NULL and NULL OPTIONAL case
+		 */
 		if (member->type->base_type == ASN1_TYPE_NULL)
 		{
 			assert(member->optional);
@@ -336,7 +319,7 @@ unstruct_struct_to_value(asn_TYPE_member_t *member, VALUE v, char *buffer)
 	}
 	else
 	{
-		member_val = unstruct_member(member, member_struct);
+		member_val = unstruct_object(member->type, member_struct);
 		rb_funcall(v, rb_intern(setter), 1, member_val);
 	}
 

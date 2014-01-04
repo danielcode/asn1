@@ -31,8 +31,9 @@ void Init_asn1()
 	VALUE cInteger, cReal, cBoolean, cNull, cIA5String;
 	VALUE cUndefined;
 
-	VALUE cNewType, cTestChoice, cTestIntSequence, cTestEnumerated;
+	VALUE cNewType, cTestChoice, cTestIntSequence, cTestEnumerated, cTestNested;
 
+	VALUE cSymbolToSchema = rb_hash_new();;
 
 	mAsn1 = rb_define_module("Asn1");
 
@@ -55,6 +56,8 @@ void Init_asn1()
 	/* Schemas 																	  */
 	/******************************************************************************/
 	cSchema = rb_define_class_under(mAsn1, "Schema", rb_cObject);
+	rb_define_const(cSchema, "SYMBOL_TO_SCHEMA", cSymbolToSchema);
+
 
 	/******************************************************************************/
 	/* Types   																	  */
@@ -70,6 +73,7 @@ void Init_asn1()
 	cTestChoice		 = define_type(cSchema, cType, "asn_DEF_TestChoice");
 	cTestIntSequence = define_type(cSchema, cType, "asn_DEF_TestIntSequence");
 	cTestEnumerated	 = define_type(cSchema, cType, "asn_DEF_TestEnumerated");
+	cTestNested		 = define_type(cSchema, cType, "asn_DEF_TestNested");
 
 
 	/******************************************************************************/

@@ -67,7 +67,6 @@ decode_choice(VALUE class, VALUE encoder, VALUE byte_string)
 
 	void *st = NULL;
 	char *str;
-	int	  length;
 
 	VALUE v;
 
@@ -81,7 +80,7 @@ decode_choice(VALUE class, VALUE encoder, VALUE byte_string)
 	/*
 	 * Convert from asn1c structure to ruby object
 	 */
-	v = unstruct_choice(class, (char *)st);
+	v = unstruct_choice(td, (char *)st);
 
 	/*
 	 * Hand to ruby

@@ -39,9 +39,8 @@ encode_null(VALUE class, VALUE encoder, VALUE v)
 VALUE
 decode_null(VALUE class, VALUE encoder, VALUE byte_string)
 {
-	NULL_t *st = NULL;
+	void *container = asn1_decode_object(&asn_DEF_NULL, encoder, byte_string);
+	VALUE val = unstruct_object(&asn_DEF_NULL, container);
 
-	st = (NULL_t *)asn1_decode_object(&asn_DEF_NULL, encoder, byte_string);
-
-	return Qnil;
+	return val;
 }

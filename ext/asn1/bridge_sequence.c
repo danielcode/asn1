@@ -67,8 +67,6 @@ decode_sequence(VALUE class, VALUE encoder, VALUE byte_string)
 
 	VALUE  v;
 	void  *st = NULL;
-	int	   length;
-
 
 	td = asn1_get_td_from_schema(class);
 	if (td == NULL) {
@@ -80,7 +78,7 @@ decode_sequence(VALUE class, VALUE encoder, VALUE byte_string)
 	/*
 	 * Convert from asn1c structure to ruby object
 	 */
-	v = unstruct_sequence(class, (char *)st);
+	v = unstruct_sequence(td, (char *)st);
 
 	/*
 	 * Hand to ruby

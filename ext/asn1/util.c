@@ -11,6 +11,7 @@
 
 #include "ENUMERATED.h"
 
+
 /******************************************************************************/
 /* Forward declarations                                                       */
 /******************************************************************************/
@@ -36,6 +37,7 @@ VALUE	instance_of_undefined(void);
 
 asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 
+
 /******************************************************************************/
 /* Externals                                                                  */
 /******************************************************************************/
@@ -58,7 +60,7 @@ void
 define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol)
 {
 	int   i;
-	VALUE type_class, schema_class;
+	VALUE type_class, schema_class, symbol_to_schema;
 	asn_TYPE_descriptor_t *td = get_type_descriptor(descriptor_symbol);
 
 	/*
@@ -97,7 +99,14 @@ define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol)
 	 */
 	schema_class = find_or_create_schema(schema_root, descriptor_symbol, type_class);
 	rb_define_const(type_class, "ASN1_SCHEMA", schema_class);
+
+	/*
+	 * 4. Map from symbol to schema
+	 */
+	symbol_to_schema = rb_const_get(schema_root, rb_intern("SYMBOL_TO_SCHEMA"));
+	rb_hash_aset(symbol_to_schema, rb_str_new2(descriptor_symbol), schema_class);
 }
+
 
 /******************************************************************************/
 /* define_seqeuence                                                           */
@@ -119,6 +128,7 @@ define_sequence(VALUE type_root, asn_TYPE_descriptor_t *td)
 	return type_class;
 }
 
+
 /******************************************************************************/
 /* define_seqeuence_of														  */
 /******************************************************************************/
@@ -129,6 +139,7 @@ define_sequence_of(VALUE type_root, asn_TYPE_descriptor_t *td)
 
 	return type_class;
 }
+
 
 /******************************************************************************/
 /* define_choice                                                              */
@@ -162,6 +173,7 @@ define_choice(VALUE type_root, asn_TYPE_descriptor_t *td)
 
 	return type_class;
 }
+
 
 /******************************************************************************/
 /* define_enumerated														  */
@@ -200,6 +212,7 @@ define_enumerated(VALUE type_root, asn_TYPE_descriptor_t *td)
 
 	return type_class;
 }
+
 
 /******************************************************************************/
 /* find_or_create_schema                                                      */
@@ -312,16 +325,16 @@ set_encoder_and_decoder(VALUE schema_class, int base_type)
 }
 
 
-/*
- * get_type_descriptor
- *
- * Find a symbol, produced by asn1c, that defines an ASN.1 type
- *
- * In particular, the symbol represents an asn1c type def.
- *
- * How to identify symbols that are asn1c type defs is outside
- * the scope of this method.
- */
+/******************************************************************************/
+/* get_type_descriptor														  */
+/*																			  */
+/* Find a symbol, produced by asn1c, that defines an ASN.1 type				  */
+/*																			  */
+/* In particular, the symbol represents an asn1c type def.					  */
+/*																			  */
+/* How to identify symbols that are asn1c type defs is outside				  */
+/* the scope of this method.												  */
+/******************************************************************************/
 asn_TYPE_descriptor_t *
 get_type_descriptor(const char *symbol)
 {
@@ -341,6 +354,7 @@ get_type_descriptor(const char *symbol)
 	return td;
 }
 
+
 /******************************************************************************/
 /* traverse_type                                                              */
 /* _traverse_type                                                             */
@@ -356,7 +370,6 @@ traverse_type(VALUE class, VALUE name)
 	 */
 	return _traverse_type(td);
 }
-
 
 VALUE
 _traverse_type(asn_TYPE_descriptor_t *td)
@@ -390,6 +403,7 @@ _traverse_type(asn_TYPE_descriptor_t *td)
 
 	return hsh;
 }
+
 
 /******************************************************************************/
 /* create_attribute_hash                                                      */
@@ -432,9 +446,9 @@ consumeBytes(const void *buffer, size_t size, void *application_specific_key)
 }
 
 
-/*
- * validate_encoding
- */
+/******************************************************************************/
+/* validate_encoding														  */
+/******************************************************************************/
 int
 validate_encoding(VALUE encoding)
 {
@@ -479,6 +493,9 @@ validate_encoding(VALUE encoding)
 }
 
 
+/******************************************************************************/
+/* asn1_get_td_from_schema													  */
+/******************************************************************************/
 asn_TYPE_descriptor_t *
 asn1_get_td_from_schema(VALUE class)
 {
@@ -498,6 +515,26 @@ asn1_get_td_from_schema(VALUE class)
 }
 
 
+/******************************************************************************/
+/* get_schema_from_td_string												  */
+/******************************************************************************/
+VALUE
+get_schema_from_td_string(char *symbol)
+{
+	VALUE asn_module_id		= rb_intern("Asn1");
+	VALUE schema_class_id	= rb_intern("Schema");
+	VALUE asn_module		= rb_const_get(rb_cObject, asn_module_id);
+	VALUE schema_class		= rb_const_get(asn_module, schema_class_id);
+	VALUE symbol_to_schema	= rb_const_get(schema_class, rb_intern("SYMBOL_TO_SCHEMA"));
+	VALUE schema			= rb_hash_lookup(symbol_to_schema, rb_str_new2(symbol));
+
+	return schema;
+}
+
+
+/******************************************************************************/
+/* is_undefined																  */
+/******************************************************************************/
 int
 is_undefined(VALUE v, int base_type)
 {
@@ -516,6 +553,10 @@ is_undefined(VALUE v, int base_type)
 	return 0;
 }
 
+
+/******************************************************************************/
+/* get_optional_value														  */
+/******************************************************************************/
 VALUE
 get_optional_value(VALUE v, asn_TYPE_member_t *member)
 {
@@ -529,6 +570,10 @@ get_optional_value(VALUE v, asn_TYPE_member_t *member)
 	return memb;
 }
 
+
+/******************************************************************************/
+/* instance_of_undefined													  */
+/******************************************************************************/
 VALUE
 instance_of_undefined(void)
 {

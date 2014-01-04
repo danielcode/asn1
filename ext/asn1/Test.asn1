@@ -30,6 +30,11 @@ TestModel DEFINITIONS ::= BEGIN -- Module parameters preamble
     three
   }
 
+  TestNested ::= SEQUENCE {
+    one SimpleSequence,
+    two TestType
+  }
+
   TestSequence ::= SEQUENCE {
     str     UTF8String,
     testVar TestType

@@ -44,18 +44,8 @@ encode_ia5string(VALUE class, VALUE encoder, VALUE v)
 VALUE
 decode_ia5string(VALUE class, VALUE encoder, VALUE byte_string)
 {
-	asn_codec_ctx_t context;
-	char		*str;
-	int			 length;
-	IA5String_t	 *st = NULL;
+	void *container = asn1_decode_object(&asn_DEF_IA5String, encoder, byte_string);
+	VALUE val = unstruct_object(&asn_DEF_IA5String, container);
 
-	/* 1. Retrive BER string and its length. */
-	str    = RSTRING_PTR(byte_string);
-	length = RSTRING_LEN(byte_string);
-
-	/* 2. Decode BER to asn1c internal format */
-	asn_DEF_IA5String.ber_decoder(NULL, &asn_DEF_IA5String, (void **)&st, (void *)str, length, 0);
-
-	/* 3. Hand to ruby */
-	return rb_str_new(st->buf, st->size);
+	return val;
 }

@@ -38,15 +38,8 @@ encode_boolean(VALUE class, VALUE encoder, VALUE v)
 VALUE
 decode_boolean(VALUE class, VALUE encoder, VALUE byte_string)
 {
-	BOOLEAN_t *bool;
-	int result;
+	void *container = asn1_decode_object(&asn_DEF_BOOLEAN, encoder, byte_string);
+	VALUE val = unstruct_object(&asn_DEF_BOOLEAN, container);
 
-	bool = (BOOLEAN_t *)asn1_decode_object(&asn_DEF_BOOLEAN, encoder, byte_string);
-
-	if (*bool == 0)
-	{
-		return Qfalse;
-	}
-
-	return Qtrue;
+	return val;
 }

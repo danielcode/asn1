@@ -11,6 +11,7 @@
 
 #include "bridge.h"
 #include "enstruct.h"
+#include "unstruct.h"
 
 
 /******************************************************************************/
@@ -74,7 +75,6 @@ decode_enumerated(VALUE class, VALUE encoder, VALUE byte_string)
 
 	void *st = NULL;
 	char *str;
-	int	  length;
 
 	VALUE v;
 
@@ -88,7 +88,7 @@ decode_enumerated(VALUE class, VALUE encoder, VALUE byte_string)
 	/*
 	 * Convert from asn1c structure to ruby object
 	 */
-	v = unstruct_enumerated(class, (char *)st);
+	v = unstruct_enumerated(td, (char *)st);
 
 	/*
 	 * Hand to ruby

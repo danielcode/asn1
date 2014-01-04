@@ -40,14 +40,8 @@ encode_real(VALUE class, VALUE encoder, VALUE v)
 VALUE
 decode_real(VALUE class, VALUE encoder, VALUE byte_string)
 {
-	double result;
-	REAL_t *st = NULL;
+	void *container = asn1_decode_object(&asn_DEF_REAL, encoder, byte_string);
+	VALUE val = unstruct_object(&asn_DEF_REAL, container);
 
-	st = (REAL_t *)asn1_decode_object(&asn_DEF_REAL, encoder, byte_string);
-
-	/* 3. Convert to number */
-	(void)asn_REAL2double(st, &result);
-	
-	/* 4. Hand to ruby */
-	return rb_float_new(result);
+	return val;
 }

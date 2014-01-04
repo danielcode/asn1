@@ -40,14 +40,8 @@ encode_int(VALUE class, VALUE encoder, VALUE v)
 VALUE
 decode_int(VALUE class, VALUE encoder, VALUE byte_string)
 {
-	long result;
-	INTEGER_t *st = NULL; /* malloc(sizeof (INTEGER_t)); */
-
-	st = (INTEGER_t *)asn1_decode_object(&asn_DEF_INTEGER, encoder, byte_string);
-
-	/* 3. Convert to number */
-	(void)asn_INTEGER2long(st, &result);
+	void *container = asn1_decode_object(&asn_DEF_INTEGER, encoder, byte_string);
+	VALUE val = unstruct_object(&asn_DEF_INTEGER, container);
 	
-	/* 4. Hand to ruby */
-	return INT2FIX(result);
+	return val;
 }

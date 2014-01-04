@@ -118,8 +118,7 @@ enstruct_object_to_memory(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 			break;
 
 		case ASN1_TYPE_ENUMERATED :
-			rb_raise(rb_eStandardError, "Unimplemented");
-			/* enstruct_enumerated(v, member, container); */
+			enstruct_enumerated(v, td, container);
 			break;
 
 		default :
@@ -250,11 +249,9 @@ enstruct_ia5string(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 void *
 enstruct_enumerated(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 {
-	char *holding_struct = create_holding_struct(td->container_size);
+	enstruct_integer(v, NULL, container);
 
-	enstruct_integer(v, NULL, holding_struct);
-
-	return (void *)holding_struct;
+	return container;
 }
 
 
