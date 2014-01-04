@@ -36,6 +36,7 @@ VALUE unstruct_ia5string(char *member_struct);
 VALUE unstruct_sequence(VALUE schema_class,    char *buffer);
 VALUE unstruct_sequence_of(VALUE schema_class, char *buffer);
 VALUE unstruct_choice(VALUE schema_class,      char *buffer);
+VALUE unstruct_enumerated(VALUE schema_class,  char *buffer);
 
 void  unstruct_struct_to_value(asn_TYPE_member_t *member, VALUE v, char *buffer);
 
@@ -213,15 +214,21 @@ VALUE
 unstruct_sequence_of(VALUE schema_class, char *buffer)
 {
 	VALUE  args	= rb_ary_new2(0);
+	VALUE class = rb_const_get(schema_class, rb_intern("CANDIDATE_TYPE"));
+	VALUE v     = rb_class_new_instance(0, &args, class);
+
 	asn_anonymous_sequence_ *sequence_of = (asn_anonymous_sequence_ *)buffer;
+	asn_TYPE_descriptor_t	*td			 = asn1_get_td_from_schema(schema_class);
+	asn_TYPE_member_t		*member		 = td->elements;
+
 	int	  i;
 	int	  length = sequence_of->count;
 
-	asn_TYPE_descriptor_t *td	  = asn1_get_td_from_schema(schema_class);
-	asn_TYPE_member_t	  *member = td->elements;
+/*
+	VALUE class_name = rb_funcall(class, rb_intern("to_s"), 0);
+	char *check = RSTRING_PTR(class_name);
+*/
 
-	VALUE class = rb_const_get(schema_class, rb_intern("CANDIDATE_TYPE"));
-	VALUE v     = rb_class_new_instance(0, &args, class);
 
 	/*
 	 *

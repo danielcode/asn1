@@ -1,21 +1,22 @@
 /******************************************************************************/
 /* Include Files															  */
 /******************************************************************************/
+#define BRIDGE_C 1
+
 #include <stdlib.h>
 #include <ruby.h>
 
 #include "asn_application.h"
 #include "REAL.h"
 
-/******************************************************************************/
-/* Forward declarations														  */
-/******************************************************************************/
-VALUE encode_real(VALUE class, VALUE encoder, VALUE v);
-VALUE decode_real(VALUE class, VALUE encoder, VALUE byte_string);
+#include "bridge.h"
+#include "enstruct.h"
+#include "unstruct.h"
 
-extern VALUE  asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, void *object);
-extern void  *asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VALUE byte_string);
 
+/******************************************************************************/
+/* Externals																  */
+/******************************************************************************/
 extern asn_TYPE_descriptor_t asn_DEF_REAL;
 
 
@@ -26,30 +27,10 @@ extern asn_TYPE_descriptor_t asn_DEF_REAL;
 VALUE
 encode_real(VALUE class, VALUE encoder, VALUE v)
 {
-	double val;
-	REAL_t st;	/* Shouldn't need to know about internals */
-	st.buf  = NULL;
-	st.size = 0;
+	void  *s		= enstruct_object(v, &asn_DEF_REAL, NULL);
+	VALUE  encoded	= asn1_encode_object(&asn_DEF_REAL, encoder, s);
 
-	/*
-	 * Validate
-	 */
-	if (!TYPE(v) == T_FLOAT)
-	{
-		rb_raise(rb_eException, "Not a float");
-	}
-
-	/*
-	 * Extract number
-	 */
-    val = NUM2DBL(v);
-
-	/*
-	 * Convert to ASN structure
-	 */
-	(void)asn_double2REAL(&st, val);
-
-	return asn1_encode_object(&asn_DEF_REAL, encoder, &st);
+	return encoded;
 }
 
 

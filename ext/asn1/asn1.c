@@ -22,15 +22,6 @@ extern VALUE decode_ia5string(VALUE class, VALUE encoder, VALUE byte_string);
 
 
 /******************************************************************************/
-/* asn1_test																  */
-/******************************************************************************/
-static VALUE asn1_test(VALUE mod)
-{
-  return rb_str_new2("Hello, world!");
-}
-
-
-/******************************************************************************/
 /* Init_asn1																  */
 /******************************************************************************/
 void Init_asn1()
@@ -42,8 +33,8 @@ void Init_asn1()
 
 	VALUE cNewType, cTestChoice, cTestIntSequence, cTestEnumerated;
 
+
 	mAsn1 = rb_define_module("Asn1");
-	rb_define_singleton_method(mAsn1, "asn1_test", asn1_test, 0);
 
 	/*
 	 * Asn1::Asn1 Class
@@ -52,40 +43,43 @@ void Init_asn1()
 	rb_define_singleton_method(cAsn1, "traverse_type",  traverse_type, 1);
 	rb_define_singleton_method(cAsn1, "define_classes", define_type, 2);
 
-	/* ************************************************************************** */
+
+	/******************************************************************************/
 	/* Errors         															  */
-	/* ************************************************************************** */
+	/******************************************************************************/
 	mError			  = rb_define_module_under(mAsn1, "Error");
 	cEncoderTypeError = rb_define_class_under(mError, "EncoderTypeError", rb_eStandardError);
 
-	/* ************************************************************************** */
+
+	/******************************************************************************/
 	/* Schemas 																	  */
-	/* ************************************************************************** */
+	/******************************************************************************/
 	cSchema = rb_define_class_under(mAsn1, "Schema", rb_cObject);
 
-	/* ************************************************************************** */
+	/******************************************************************************/
 	/* Types   																	  */
-	/* ************************************************************************** */
+	/******************************************************************************/
 	/* mType = rb_define_module_under(mAsn1, "Type"); */
 	cType = rb_define_class_under(mAsn1, "Type", rb_cObject);
 
-	/* ************************************************************************** */
+
+	/******************************************************************************/
 	/* Structured Types															  */
-	/* ************************************************************************** */
+	/******************************************************************************/
 	cNewType		 = define_type(cSchema, cType, "asn_DEF_SimpleSequence");
 	cTestChoice		 = define_type(cSchema, cType, "asn_DEF_TestChoice");
 	cTestIntSequence = define_type(cSchema, cType, "asn_DEF_TestIntSequence");
 	cTestEnumerated	 = define_type(cSchema, cType, "asn_DEF_TestEnumerated");
 
-	/* ************************************************************************** */
+
+	/******************************************************************************/
 	/* Primitive Types															  */
-	/* ************************************************************************** */
+	/******************************************************************************/
 
 	/*
 	 * Integer
 	 */
 	cInteger = rb_define_class_under(mAsn1, "Integer", rb_cObject);
- 	rb_define_const(cInteger, "TEST", rb_str_new2("anything"));
 
 	rb_define_singleton_method(cInteger, "encode", encode_int, 2);
 	rb_define_singleton_method(cInteger, "decode", decode_int, 2);

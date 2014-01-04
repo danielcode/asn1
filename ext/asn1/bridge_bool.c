@@ -1,18 +1,21 @@
+/******************************************************************************/
+/* Include Files															  */
+/******************************************************************************/
+#define BRIDGE_C 1
+
 #include <stdlib.h>
 #include <ruby.h>
 
 #include "asn_application.h"
 #include "BOOLEAN.h"
 
-/*
- * Forward declarations
- */
-VALUE encode_boolean(VALUE class, VALUE encoder, VALUE v);
-VALUE decode_boolean(VALUE class, VALUE encoder, VALUE byte_string);
+#include "bridge.h"
+#include "enstruct.h"
+#include "unstruct.h"
 
-extern VALUE  asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, void *object);
-extern void  *asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VALUE byte_string);
-
+/******************************************************************************/
+/* Externals																  */
+/******************************************************************************/
 extern asn_TYPE_descriptor_t asn_DEF_BOOLEAN;
 
 /******************************************************************************/
@@ -22,32 +25,10 @@ extern asn_TYPE_descriptor_t asn_DEF_BOOLEAN;
 VALUE
 encode_boolean(VALUE class, VALUE encoder, VALUE v)
 {
-	int bool;
-	BOOLEAN_t b;
+	void  *s		= enstruct_object(v, &asn_DEF_BOOLEAN, NULL);
+	VALUE  encoded	= asn1_encode_object(&asn_DEF_BOOLEAN, encoder, s);
 
-	/*
-	 * Validate
-	 */
-	/*
-	if (!(TYPE(v) == T_TRUE || TYPE(v) == T_FALSE))
-	{
-		rb_raise(rb_eException, "Not a boolean class");
-	}
-	*/
-
-	/*
-	 * Extract number
-	 */
-	if (TYPE(v) == T_TRUE)
-	{
-		bool = 1;
-	}
-	else
-	{
-		bool = 0;
-	}
-
-	return asn1_encode_object(&asn_DEF_BOOLEAN, encoder, &bool);
+	return encoded;
 }
 
 

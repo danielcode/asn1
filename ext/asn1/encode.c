@@ -10,8 +10,6 @@
 /******************************************************************************/
 /* Forward declarations														  */
 /******************************************************************************/
-VALUE  asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, void *object);
-void  *asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VALUE byte_string);
 char  *encoder_string(VALUE encoder);
 
 

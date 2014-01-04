@@ -1,30 +1,26 @@
 /******************************************************************************/
 /* Include Files															  */
 /******************************************************************************/
+#define BRIDGE_C 1
+
 #include <stdlib.h>
 #include <ruby.h>
 
 #include "asn_application.h"
 #include "expr_types.h"
 
-#include "util.h"
+#include "bridge.h"
+#include "enstruct.h"
 
 
 /******************************************************************************/
 /* Forward declarations														  */
 /******************************************************************************/
-VALUE  encode_enumerated(VALUE class, VALUE encoder, VALUE v);
-VALUE  decode_enumerated(VALUE class, VALUE encoder, VALUE byte_string);
 
 
 /******************************************************************************/
 /* Externals																  */
 /******************************************************************************/
-extern VALUE  asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, void *object);
-extern void  *asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VALUE byte_string);
-extern char  *enstruct_enumerated(asn_TYPE_descriptor_t *td,  VALUE class, VALUE v);
-extern VALUE  unstruct_enumerated(VALUE schema_class, char *buffer);
-
 extern asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 
 
@@ -57,7 +53,7 @@ encode_enumerated(VALUE class, VALUE encoder, VALUE v)
 	/*
 	 * 3. Create C struct equivalent of ruby object
 	 */
-	s  = (void *)enstruct_enumerated(td, class, selection);
+	s  = enstruct_object(selection, td, NULL);
 
 	/*
 	 * 4. Perform encoding to specified serialization format (i.e. BER, DER, PER or XML)

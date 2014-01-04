@@ -1,22 +1,22 @@
 /******************************************************************************/
 /* Include Files															  */
 /******************************************************************************/
+#define BRIDGE_C 1
+
 #include <stdlib.h>
 #include <ruby.h>
 
 #include "asn_application.h"
 #include "INTEGER.h"
 
+#include "bridge.h"
+#include "enstruct.h"
+#include "unstruct.h"
+
 
 /******************************************************************************/
 /* Forward declarations														  */
 /******************************************************************************/
-VALUE encode_int(VALUE class, VALUE encoder, VALUE v);
-VALUE decode_int(VALUE class, VALUE encoder, VALUE byte_string);
-
-extern VALUE  asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, void *object);
-extern void  *asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VALUE byte_string);
-
 extern asn_TYPE_descriptor_t asn_DEF_INTEGER;
 
 
@@ -27,31 +27,10 @@ extern asn_TYPE_descriptor_t asn_DEF_INTEGER;
 VALUE
 encode_int(VALUE class, VALUE encoder, VALUE v)
 {
-	INTEGER_t st;
-	st.buf  = NULL;
-	st.size = 0;
+	void  *s	   = enstruct_object(v, &asn_DEF_INTEGER, NULL);
+	VALUE  encoded = asn1_encode_object(&asn_DEF_INTEGER, encoder, s);
 
-	/*
-	 * Validate
-	 */
-	/*
-	if (!TYPE(v) == T_FIXNUM)
-	{
-		rb_raise(rb_eException, "Not an integer");
-	}
-	*/
-
-	/*
-	 * Extract number
-	 */
-    long val = FIX2LONG(v);
-
-	/*
-	 * Convert to ASN structure
-	 */
-	(void)asn_long2INTEGER(&st, val);
-
-	return asn1_encode_object(&asn_DEF_INTEGER, encoder, &st);
+	return encoded;
 }
 
 
