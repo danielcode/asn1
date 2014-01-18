@@ -112,4 +112,5 @@ Classes
 Exclusions
 ----------
 * Doesn't handle ambiguous CHOICE elements
+* Doesn't handle anonymous SEQUENCEs
 * Currently no consideration of Information Object Classes

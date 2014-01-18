@@ -32,6 +32,7 @@ void	set_encoder_and_decoder(VALUE schema_class, int base_type);
 VALUE   lookup_type(struct asn_TYPE_member_s *tms);
 int		consumeBytes(const void *buffer, size_t size, void *application_specific_key);
 int		validate_encoding(VALUE encoding);
+VALUE	get_schema_from_td_string(char *symbol);
 int		is_undefined(VALUE v, int base_type);
 VALUE	get_optional_value(VALUE v, asn_TYPE_member_t *member);
 VALUE	instance_of_undefined(void);
@@ -63,6 +64,10 @@ define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol)
 	int   i;
 	VALUE type_class, schema_class, symbol_to_schema;
 	asn_TYPE_descriptor_t *td = get_type_descriptor(descriptor_symbol);
+	if (!td)
+	{
+		rb_raise(rb_eException, "Can't find symbol");
+	}
 
 	/*
 	 * 1. 
@@ -240,6 +245,11 @@ find_or_create_schema(VALUE schema_root, char *descriptor_symbol, VALUE candidat
 	int   i;
 
 	asn_TYPE_descriptor_t *td = get_type_descriptor(descriptor_symbol);
+	if (!td)
+	{
+		rb_raise(rb_eException, "Can't find symbol");
+	}
+	
 	schema_class = rb_define_class_under(schema_root, td->name, rb_cObject);
 
 	/*
@@ -289,11 +299,36 @@ VALUE
 ruby_class_from_asn1_type(asn_TYPE_descriptor_t *td)
 {
 	VALUE type;
+	VALUE schema_class;
 
 	switch(td->base_type)
 	{
 		case ASN1_TYPE_INTEGER :
 			type = rb_cFixnum;
+			break;
+
+		case ASN1_TYPE_SEQUENCE :
+			type = get_schema_from_td_string(td->symbol);
+			if (type == Qnil)
+			{
+				rb_raise(rb_eException, "ruby_class_from_asn1_type(): can't locate SEQUENCE");
+			}
+			break;
+
+		case ASN1_TYPE_SEQUENCE_OF :
+			type = get_schema_from_td_string(td->symbol);
+			if (type == Qnil)
+			{
+				rb_raise(rb_eException, "ruby_class_from_asn1_type(): can't locate SEQUENCE OF");
+			}
+			break;
+
+		case ASN1_TYPE_CHOICE :
+			type = get_schema_from_td_string(td->symbol);
+			if (type == Qnil)
+			{
+				rb_raise(rb_eException, "ruby_class_from_asn1_type(): can't locate CHOICE");
+			}
 			break;
 
 		default :
@@ -353,7 +388,7 @@ asn_TYPE_descriptor_t *
 get_type_descriptor(const char *symbol)
 {
 	asn_TYPE_descriptor_t *td = NULL;
-	void *sym	 = NULL;
+	void *sym = NULL;
 
 	/*
 	 * Find an interesting symbol
@@ -378,6 +413,10 @@ traverse_type(VALUE class, VALUE name)
 {
 	const char *symbol = StringValuePtr(name);
 	asn_TYPE_descriptor_t *td = get_type_descriptor(symbol);
+	if (!td)
+	{
+		rb_raise(rb_eException, "Can't find symbol");
+	}
 
 	/*
 	 * Go type spelunking
@@ -525,7 +564,9 @@ asn1_get_td_from_schema(VALUE class)
 	length = RSTRING_LEN(vTD);
 	tdName = RSTRING_PTR(vTD);
 
-	return get_type_descriptor(tdName);
+	td = get_type_descriptor(tdName);
+
+	return td;
 }
 
 

@@ -46,7 +46,6 @@ static char *setter_name_from_member_name(char *name);
 /******************************************************************************/
 /* Externals																  */
 /******************************************************************************/
-extern asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 extern VALUE instance_of_undefined(void); 
 extern VALUE get_schema_from_td_string(char *symbol);
 
