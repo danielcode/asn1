@@ -17,19 +17,21 @@
 /******************************************************************************/
 asn_TYPE_descriptor_t *get_type_descriptor(const char *name);
 
-VALUE   traverse_type(VALUE class, VALUE name);
-VALUE   _traverse_type(asn_TYPE_descriptor_t *td);
-VALUE	create_attribute_hash(struct asn_TYPE_member_s *element);
-VALUE	define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol);
-VALUE	define_type_from_ruby(VALUE class, VALUE schema_root, VALUE type_root, VALUE symbol);
-VALUE	define_sequence(VALUE type_root, asn_TYPE_descriptor_t *td);
-VALUE	define_sequence_of(VALUE type_root, asn_TYPE_descriptor_t *td);
-VALUE	define_choice(VALUE type_root, asn_TYPE_descriptor_t *td);
-VALUE	define_enumerated(VALUE type_root, asn_TYPE_descriptor_t *td);
-VALUE	find_or_create_schema(VALUE schema_root, char *descriptor_symbol, VALUE candidate_type);
+VALUE	traverse_type(VALUE class, VALUE name);
+VALUE	_traverse_type(asn_TYPE_descriptor_t *td);
+VALUE	create_attribute_hash(VALUE schema_root, VALUE schema_base, VALUE schema_class, VALUE type_root, struct asn_TYPE_member_s *element);
+VALUE	define_type(VALUE schema_root, VALUE schema_base, VALUE type_root, char *descriptor_symbol);
+VALUE	define_type_from_ruby(VALUE class, VALUE schema_root, VALUE schema_base, VALUE type_root, VALUE symbol);
+VALUE	define_sequence(VALUE schema_root, VALUE type_class, asn_TYPE_descriptor_t *td);
+VALUE	define_sequence_of(VALUE schema_root, VALUE type_class, asn_TYPE_descriptor_t *td);
+VALUE	define_choice(VALUE schema_root, VALUE type_class, asn_TYPE_descriptor_t *td);
+VALUE	define_enumerated(VALUE schema_root, VALUE type_class, asn_TYPE_descriptor_t *td);
+VALUE	get_schema_stub(VALUE schema_root, VALUE candidate_type, char *descriptor_symbol);
+VALUE	get_type_stub(VALUE type_root, asn_TYPE_descriptor_t *td);
+void	finalize_schema(VALUE schema_root, VALUE schema_base, VALUE schema_class, VALUE type_root, asn_TYPE_descriptor_t *td);
 VALUE	ruby_class_from_asn1_type(asn_TYPE_descriptor_t *td);
 void	set_encoder_and_decoder(VALUE schema_class, int base_type);
-VALUE   lookup_type(struct asn_TYPE_member_s *tms);
+VALUE	lookup_type(struct asn_TYPE_member_s *tms);
 int		consumeBytes(const void *buffer, size_t size, void *application_specific_key);
 int		validate_encoding(VALUE encoding);
 VALUE	get_schema_from_td_string(char *symbol);
@@ -59,35 +61,40 @@ extern VALUE decode_enumerated(VALUE class, VALUE encoder, VALUE byte_string);
 /* XXXXX - need to handle recursively defined types                           */
 /******************************************************************************/
 VALUE
-define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol)
+define_type(VALUE schema_root, VALUE schema_base, VALUE type_root, char *descriptor_symbol)
 {
-	int   i;
-	VALUE type_class, schema_class, symbol_to_schema;
 	asn_TYPE_descriptor_t *td = get_type_descriptor(descriptor_symbol);
+
+	VALUE type_class		= get_type_stub(type_root, td);
+	VALUE schema_class		= get_schema_stub(schema_base, type_class, descriptor_symbol);
+	VALUE symbol_to_schema	= rb_const_get(schema_root, rb_intern("SYMBOL_TO_SCHEMA"));;
+
+	rb_hash_aset(symbol_to_schema, rb_str_new2(descriptor_symbol), schema_class);
+
 	if (!td)
 	{
 		rb_raise(rb_eException, "Can't find symbol");
 	}
 
 	/*
-	 * 1. 
+	 * 1. Define type, based on base ASN.1 type.
 	 */
 	switch(td->base_type)
 	{
 		case ASN1_TYPE_SEQUENCE :
-			type_class = define_sequence(type_root, td);
+			type_class = define_sequence(schema_base, type_class, td);
 			break;
 
 		case ASN1_TYPE_SEQUENCE_OF :
-			type_class = define_sequence_of(type_root, td);
+			type_class = define_sequence_of(schema_base, type_class, td);
 			break;
 
 		case ASN1_TYPE_CHOICE :
-			type_class = define_choice(type_root, td);
+			type_class = define_choice(schema_base, type_class, td);
 			break;
 
 		case ASN1_TYPE_ENUMERATED :
-			type_class = define_enumerated(type_root, td);
+			type_class = define_enumerated(schema_base, type_class, td);
 			break;
 
 		default :
@@ -101,16 +108,11 @@ define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol)
 	rb_define_const(type_class, "ASN1_TYPE", rb_str_new2(descriptor_symbol));
 
 	/*
-	 * 3. Attach schema to type
+	 * 3. Make schema class and type class refer to each other.
 	 */
-	schema_class = find_or_create_schema(schema_root, descriptor_symbol, type_class);
 	rb_define_const(type_class, "ASN1_SCHEMA", schema_class);
 
-	/*
-	 * 4. Map from symbol to schema
-	 */
-	symbol_to_schema = rb_const_get(schema_root, rb_intern("SYMBOL_TO_SCHEMA"));
-	rb_hash_aset(symbol_to_schema, rb_str_new2(descriptor_symbol), schema_class);
+	finalize_schema(schema_root, schema_base, schema_class, type_root, td);
 
 	return schema_class;
 }
@@ -120,10 +122,10 @@ define_type(VALUE schema_root, VALUE type_root, char *descriptor_symbol)
 /* define_type_from_ruby													  */
 /******************************************************************************/
 VALUE
-define_type_from_ruby(VALUE class, VALUE schema_root, VALUE type_root, VALUE symbol)
+define_type_from_ruby(VALUE class, VALUE schema_root, VALUE schema_base, VALUE type_root, VALUE symbol)
 {
 	char  *symbol_str = RSTRING_PTR(symbol);
-	return define_type(schema_root, type_root, symbol_str);
+	return define_type(schema_root, schema_base, type_root, symbol_str);
 }
 
 
@@ -131,9 +133,8 @@ define_type_from_ruby(VALUE class, VALUE schema_root, VALUE type_root, VALUE sym
 /* define_sequence                                                           */
 /******************************************************************************/
 VALUE
-define_sequence(VALUE type_root, asn_TYPE_descriptor_t *td)
+define_sequence(VALUE schema_root, VALUE type_class, asn_TYPE_descriptor_t *td)
 {
-	VALUE type_class = rb_define_class_under(type_root, td->name, rb_cObject);
 	int	i;
 
 	for (i = 0; i < td->elements_count; i++)
@@ -152,11 +153,9 @@ define_sequence(VALUE type_root, asn_TYPE_descriptor_t *td)
 /* define_seqeuence_of														  */
 /******************************************************************************/
 VALUE
-define_sequence_of(VALUE type_root, asn_TYPE_descriptor_t *td)
+define_sequence_of(VALUE schema_root, VALUE type_class, asn_TYPE_descriptor_t *td)
 {
-	VALUE type_class = rb_define_class_under(type_root, td->name, rb_cArray);
-
-	return type_class;
+	return type_class;	/* XXXXX - Noop */
 }
 
 
@@ -164,12 +163,11 @@ define_sequence_of(VALUE type_root, asn_TYPE_descriptor_t *td)
 /* define_choice                                                              */
 /******************************************************************************/
 VALUE
-define_choice(VALUE type_root, asn_TYPE_descriptor_t *td)
+define_choice(VALUE schema_root, VALUE type_class, asn_TYPE_descriptor_t *td)
 {
 	ID asn_module_id	  		 = rb_intern("Asn1");
     ID asn_accessorize_module_id = rb_intern("Accessorize");
 
-	VALUE type_class = rb_define_class_under(type_root, td->name, rb_cObject);
 	VALUE params	 = rb_ary_new();
 
 	VALUE asn_module	  	 = rb_const_get(rb_cObject, asn_module_id);
@@ -198,14 +196,13 @@ define_choice(VALUE type_root, asn_TYPE_descriptor_t *td)
 /* define_enumerated														  */
 /******************************************************************************/
 VALUE
-define_enumerated(VALUE type_root, asn_TYPE_descriptor_t *td)
+define_enumerated(VALUE schema_root, VALUE type_class, asn_TYPE_descriptor_t *td)
 {
 	asn_INTEGER_specifics_t *specifics = (asn_INTEGER_specifics_t *)td->specifics;
 
 	ID asn_module_id	  	   = rb_intern("Asn1");
     ID asn_enumerize_module_id = rb_intern("Enumerize");
 
-	VALUE type_class = rb_define_class_under(type_root, td->name, rb_cObject);
 	VALUE params	 = rb_ary_new();
 
 	VALUE asn_module	  	 = rb_const_get(rb_cObject, asn_module_id);
@@ -234,14 +231,14 @@ define_enumerated(VALUE type_root, asn_TYPE_descriptor_t *td)
 
 
 /******************************************************************************/
-/* find_or_create_schema                                                      */
-/* Returns a ruby class associated with a corresponding ASN.1 type            */
+/* get_schema_stub	 		                                                  */
+/* Find or create a schema class representing an ASN.1 class.  Does			  */
+/* everything but associate a candidate implementation type with the schema.  */
 /******************************************************************************/
 VALUE
-find_or_create_schema(VALUE schema_root, char *descriptor_symbol, VALUE candidate_type)
+get_schema_stub(VALUE schema_root, VALUE candidate_type, char *descriptor_symbol)
 {
 	VALUE schema_class;
-	VALUE type_hash = rb_hash_new();
 	int   i;
 
 	asn_TYPE_descriptor_t *td = get_type_descriptor(descriptor_symbol);
@@ -257,8 +254,33 @@ find_or_create_schema(VALUE schema_root, char *descriptor_symbol, VALUE candidat
 	 */
 	rb_define_const(schema_class, "ANONYMOUS",      INT2FIX(td->anonymous));
 	rb_define_const(schema_class, "PRIMITIVE",      INT2FIX(td->generated));
-	rb_define_const(schema_class, "CANDIDATE_TYPE", candidate_type);
 	rb_define_const(schema_class, "ASN1_TYPE",      rb_str_new2(descriptor_symbol));
+	rb_define_const(schema_class, "CANDIDATE_TYPE", candidate_type);
+
+	return schema_class;
+}
+
+
+/******************************************************************************/
+/* get_type_stub                                                              */
+/******************************************************************************/
+VALUE
+get_type_stub(VALUE type_root, asn_TYPE_descriptor_t *td)
+{
+	return rb_define_class_under(type_root, td->name, rb_cObject);
+}
+
+
+/******************************************************************************/
+/* finalize_schema															  */
+/* Everything that can't be done while we're worried about recursive		  */
+/* definitions.  Currently, just attaches a candidate type to a schema.		  */
+/******************************************************************************/
+void
+finalize_schema(VALUE schema_root, VALUE schema_base, VALUE schema_class, VALUE type_root, asn_TYPE_descriptor_t *td)
+{
+	VALUE type_hash = rb_hash_new();
+	int i;
 
 	/* XXXXX - Probably need to handle SET OF differently. */
 	if (td->base_type == ASN1_TYPE_SEQUENCE_OF || td->base_type == ASN1_TYPE_SET_OF)
@@ -279,7 +301,7 @@ find_or_create_schema(VALUE schema_root, char *descriptor_symbol, VALUE candidat
 			if (strlen(td->elements[i].name) > 0)
 			{
 				rb_hash_aset(type_hash, rb_str_new2(td->elements[i].name),
-							 create_attribute_hash(&td->elements[i]));
+							 create_attribute_hash(schema_root, schema_base, schema_class, type_root, &td->elements[i]));
 			}
 		}
 	}
@@ -287,10 +309,7 @@ find_or_create_schema(VALUE schema_root, char *descriptor_symbol, VALUE candidat
 	rb_define_const(schema_class, "ATTRIBUTES", type_hash);
 
 	set_encoder_and_decoder(schema_class, td->base_type);
-
-	return schema_class;
 }
-
 
 /******************************************************************************/
 /* ruby_class_from_asn1_type												  */
@@ -462,10 +481,19 @@ _traverse_type(asn_TYPE_descriptor_t *td)
 /* create_attribute_hash                                                      */
 /******************************************************************************/
 VALUE
-create_attribute_hash(struct asn_TYPE_member_s *element)
+create_attribute_hash(VALUE schema_root, VALUE schema_base, VALUE schema_class, VALUE type_root, struct asn_TYPE_member_s *element)
 {
 	VALUE attribute_hash = rb_hash_new();
-	rb_hash_aset(attribute_hash, rb_str_new2("type"),      lookup_type(element));
+	VALUE type			 = lookup_type(element);
+
+	if (type == Qnil)
+	{
+		/* XXXXX - fix this */
+		VALUE schema = define_type(schema_root, schema_root, type_root, element->type->symbol);
+		type = rb_const_get(schema, rb_intern("CANDIDATE_TYPE"));
+	}
+
+	rb_hash_aset(attribute_hash, rb_str_new2("type"),      type);
 	rb_hash_aset(attribute_hash, rb_str_new2("base_type"), rb_str_new2("NOT WORKING"));
 	rb_hash_aset(attribute_hash, rb_str_new2("optional"),  INT2FIX(element->optional));
 
@@ -479,7 +507,50 @@ create_attribute_hash(struct asn_TYPE_member_s *element)
 VALUE
 lookup_type(struct asn_TYPE_member_s *tms)
 {
-	return rb_str_new2(tms->type->name);
+	VALUE type;
+
+	if (tms->type->generated == 0)
+	{
+		switch(tms->type->base_type)
+		{
+			case ASN1_TYPE_NULL :
+				type = rb_cNilClass;
+				break;
+
+			case ASN1_TYPE_INTEGER :
+				type = rb_cFixnum;
+				break;
+
+			case ASN1_TYPE_REAL :
+				type = rb_cFloat;
+				break;
+
+			case ASN1_TYPE_IA5String :
+				type = rb_cString;
+				break;
+
+			case ASN1_TYPE_UTF8String :
+				type = rb_cString;
+				break;
+
+			default :
+				rb_raise(rb_eStandardError, "lookup_type: Unknown base type");
+				break;
+		}
+	}
+	else
+	{
+		VALUE schema_class = get_schema_from_td_string(tms->type->symbol);
+		if (schema_class == Qnil) {
+			type = Qnil;
+		}
+		else
+		{
+			type = rb_const_get(schema_class, rb_intern("CANDIDATE_TYPE"));
+		}
+	}
+	
+	return type;
 }
 
 
