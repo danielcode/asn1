@@ -7,7 +7,6 @@
 /* Externals																  */
 /******************************************************************************/
 extern VALUE traverse_type(VALUE class, VALUE name);
-extern VALUE define_type(VALUE schema_root, VALUE schema_base, VALUE type_root, char *descriptor_symbol);
 extern VALUE define_type_from_ruby(VALUE class, VALUE schema_root, VALUE schema_base, VALUE type_root, VALUE symbol);
 
 
@@ -87,7 +86,7 @@ void Init_asn1()
 	/*
 	 * Integer
 	 */
-	cInteger = rb_define_class_under(mAsn1, "Integer", rb_cObject);
+	cInteger = rb_define_class_under(cType, "Integer", rb_cObject);
 
 	rb_define_singleton_method(cInteger, "encode", encode_int, 2);
 	rb_define_singleton_method(cInteger, "decode", decode_int, 2);
@@ -95,7 +94,7 @@ void Init_asn1()
 	/*
 	 * Real
 	 */
-	cReal = rb_define_class_under(mAsn1, "Real", rb_cObject);
+	cReal = rb_define_class_under(cType, "Real", rb_cObject);
 
 	rb_define_singleton_method(cReal, "encode", encode_real, 2);
 	rb_define_singleton_method(cReal, "decode", decode_real, 2);
@@ -103,7 +102,7 @@ void Init_asn1()
 	/*
 	 * Boolean
 	 */
-	cBoolean = rb_define_class_under(mAsn1, "Boolean", rb_cObject);
+	cBoolean = rb_define_class_under(cType, "Boolean", rb_cObject);
 
 	rb_define_singleton_method(cBoolean, "encode", encode_boolean, 2);
 	rb_define_singleton_method(cBoolean, "decode", decode_boolean, 2);
@@ -111,7 +110,7 @@ void Init_asn1()
 	/*
 	 * Null
 	 */
-	cNull = rb_define_class_under(mAsn1, "Null", rb_cObject);
+	cNull = rb_define_class_under(cType, "Null", rb_cObject);
 
 	rb_define_singleton_method(cNull, "encode", encode_null, 2);
 	rb_define_singleton_method(cNull, "decode", decode_null, 2);
@@ -119,7 +118,7 @@ void Init_asn1()
 	/*
 	 * IA5String
 	 */
-	cIA5String = rb_define_class_under(mAsn1, "IA5String", rb_cObject);
+	cIA5String = rb_define_class_under(cType, "IA5String", rb_cObject);
 
 	rb_define_singleton_method(cIA5String, "encode", encode_ia5string, 2);
 	rb_define_singleton_method(cIA5String, "decode", decode_ia5string, 2);
