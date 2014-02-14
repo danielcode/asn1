@@ -20,6 +20,8 @@ extern VALUE encode_null(VALUE class, VALUE encoder, VALUE v);
 extern VALUE decode_null(VALUE class, VALUE encoder, VALUE byte_string);
 extern VALUE encode_ia5string(VALUE class, VALUE encoder, VALUE v);
 extern VALUE decode_ia5string(VALUE class, VALUE encoder, VALUE byte_string);
+extern VALUE encode_utf8string(VALUE class, VALUE encoder, VALUE v);
+extern VALUE decode_utf8string(VALUE class, VALUE encoder, VALUE byte_string);
 
 
 /******************************************************************************/
@@ -29,7 +31,7 @@ void Init_asn1()
 {
 	VALUE mAsn1, mError, cAsn1, cSchema, cType;
 	VALUE cEncoderTypeError;
-	VALUE cInteger, cReal, cBoolean, cNull, cIA5String;
+	VALUE cInteger, cReal, cBoolean, cNull, cIA5String, cUTF8String;
 	VALUE cUndefined;
 
 	VALUE cNewType, cTestChoice, cTestIntSequence, cTestEnumerated, cTestNested;
@@ -122,4 +124,12 @@ void Init_asn1()
 
 	rb_define_singleton_method(cIA5String, "encode", encode_ia5string, 2);
 	rb_define_singleton_method(cIA5String, "decode", decode_ia5string, 2);
+
+	/*
+	 * UTF8String
+	 */
+	cUTF8String = rb_define_class_under(cType, "UTF8String", rb_cObject);
+
+	rb_define_singleton_method(cUTF8String, "encode", encode_utf8string, 2);
+	rb_define_singleton_method(cUTF8String, "decode", decode_utf8string, 2);
 }

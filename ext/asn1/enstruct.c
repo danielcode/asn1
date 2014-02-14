@@ -16,6 +16,7 @@
 #include "BOOLEAN.h"
 #include "NULL.h"
 #include "IA5String.h"
+#include "UTF8String.h"
 #include "OCTET_STRING.h"
 #include "constr_CHOICE.h"
 #include "asn_SEQUENCE_OF.h"
@@ -33,6 +34,7 @@ void *enstruct_real(VALUE v,			 asn_TYPE_descriptor_t *td, void *container);
 void *enstruct_boolean(VALUE v,			 asn_TYPE_descriptor_t *td, void *container);
 void *enstruct_null(VALUE v,			 asn_TYPE_descriptor_t *td, void *container);
 void *enstruct_ia5string(VALUE v,		 asn_TYPE_descriptor_t *td, void *container);
+void *enstruct_utf8string(VALUE v,		 asn_TYPE_descriptor_t *td, void *container);
 void *enstruct_enumerated(VALUE v,		 asn_TYPE_descriptor_t *td, void *container);
 void *enstruct_sequence(VALUE v,		 asn_TYPE_descriptor_t *td, void *container);
 void *enstruct_sequence_of(VALUE v,		 asn_TYPE_descriptor_t *td, void *container);
@@ -91,6 +93,10 @@ enstruct_object_to_memory(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 
 		case ASN1_TYPE_IA5String :
 			enstruct_ia5string(v, td, container);
+			break;
+
+		case ASN1_TYPE_UTF8String :
+			enstruct_utf8string(v, td, container);
 			break;
 
 		case ASN1_TYPE_REAL :
@@ -240,6 +246,17 @@ enstruct_ia5string(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 	memcpy(container, (void *)os, sizeof(OCTET_STRING_t));
 
 	return container;
+}
+
+
+/******************************************************************************/
+/* UTF8String																  */
+/* Note: assuming OCTET_STRING is constant length							  */
+/******************************************************************************/
+void *
+enstruct_utf8string(VALUE v, asn_TYPE_descriptor_t *td, void *container)
+{
+	return enstruct_ia5string(v, td, container);
 }
 
 
