@@ -10,12 +10,12 @@ TestModel DEFINITIONS ::= BEGIN -- Module parameters preamble
     optNull      NULL OPTIONAL -- Hardly simple
   }
 
-  TestType ::= INTEGER
+  TestType  ::= INTEGER
   Test2Type ::= TestType
   Test3Type ::= Test2Type
-  RealTest ::= REAL
-  BoolTest ::= BOOLEAN
-  NullTest ::= NULL
+  RealTest  ::= REAL
+  BoolTest  ::= BOOLEAN
+  NullTest  ::= NULL
 
   TestChoice ::= CHOICE {
     int1 [0] INTEGER,
@@ -59,6 +59,10 @@ TestModel DEFINITIONS ::= BEGIN -- Module parameters preamble
     },
     level1 Test2Type,
     testSequence TestSequence
+  }
+
+  RefTest ::= SEQUENCE {
+    sequence3 TestSequence
   }
 
   DerivedAnonSequence ::= AnonSequence

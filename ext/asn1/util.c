@@ -41,6 +41,7 @@ VALUE	 get_optional_value(VALUE v, asn_TYPE_member_t *member);
 VALUE	 instance_of_undefined(void);
 int		 is_anonymous(asn_TYPE_descriptor_t *td);
 char	*class_name(asn_TYPE_descriptor_t *td);
+VALUE	 get_primitive_type(int t);
 
 asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
 
@@ -61,7 +62,6 @@ extern VALUE decode_enumerated(VALUE class, VALUE encoder, VALUE byte_string);
 /******************************************************************************/
 /* define_type                                                                */
 /* Returns a ruby class associated with a corresponding ASN.1 type            */
-/* XXXXX - need to handle recursively defined types                           */
 /******************************************************************************/
 VALUE
 define_type(VALUE schema_root, VALUE schema_base, VALUE type_root, VALUE type_base, char *descriptor_symbol)
@@ -77,6 +77,18 @@ define_type(VALUE schema_root, VALUE schema_base, VALUE type_root, VALUE type_ba
 	{
 		rb_raise(rb_eException, "Can't find symbol");
 	}
+
+	switch(td->base_type)
+	{
+		case ASN1_TYPE_INTEGER :
+		case ASN1_TYPE_UTF8String :
+			return get_primitive_type(td->base_type);
+			break;
+
+		default :
+			break;
+	}
+
 	name = class_name(td);
 
 	if (td->inherit != NULL)
@@ -85,6 +97,9 @@ define_type(VALUE schema_root, VALUE schema_base, VALUE type_root, VALUE type_ba
 	}
 
 
+	type_class		 = get_type_stub(type_base, td, name);
+	schema_class	 = get_schema_stub(schema_base, type_class, descriptor_symbol, name);
+	symbol_to_schema = rb_const_get(schema_root, rb_intern("SYMBOL_TO_SCHEMA"));
 	rb_hash_aset(symbol_to_schema, rb_str_new2(descriptor_symbol), schema_class);
 
 	/*
@@ -93,33 +108,21 @@ define_type(VALUE schema_root, VALUE schema_base, VALUE type_root, VALUE type_ba
 	switch(td->base_type)
 	{
 		case ASN1_TYPE_SEQUENCE :
-			type_class		 = get_type_stub(type_base, td, name);
-			schema_class	 = get_schema_stub(schema_base, type_class, descriptor_symbol, name);
-			symbol_to_schema = rb_const_get(schema_root, rb_intern("SYMBOL_TO_SCHEMA"));
 			define_sequence(schema_base, type_class, td);
 			structured = 1;
 			break;
 
 		case ASN1_TYPE_SEQUENCE_OF :
-			type_class		 = get_type_stub(type_base, td, name);
-			schema_class	 = get_schema_stub(schema_base, type_class, descriptor_symbol, name);
-			symbol_to_schema = rb_const_get(schema_root, rb_intern("SYMBOL_TO_SCHEMA"));
 			define_sequence_of(schema_base, type_class, td);
 			structured = 1;
 			break;
 
 		case ASN1_TYPE_CHOICE :
-			type_class		 = get_type_stub(type_base, td, name);
-			schema_class	 = get_schema_stub(schema_base, type_class, descriptor_symbol, name);
-			symbol_to_schema = rb_const_get(schema_root, rb_intern("SYMBOL_TO_SCHEMA"));
 			define_choice(schema_base, type_class, td);
 			structured = 1;
 			break;
 
 		case ASN1_TYPE_ENUMERATED :
-			type_class		 = get_type_stub(type_base, td, name);
-			schema_class	 = get_schema_stub(schema_base, type_class, descriptor_symbol, name);
-			symbol_to_schema = rb_const_get(schema_root, rb_intern("SYMBOL_TO_SCHEMA"));
 			define_enumerated(schema_base, type_class, td);
 			structured = 1;
 			break;
@@ -144,7 +147,7 @@ define_type(VALUE schema_root, VALUE schema_base, VALUE type_root, VALUE type_ba
 
 	free((void *)name);
 
-	return schema_class;
+	return type_class;
 }
 
 
@@ -327,8 +330,8 @@ finalize_schema(VALUE schema_root, VALUE schema_base, VALUE type_root, VALUE typ
 		{
 			if (strlen(td->elements[i].name) > 0)
 			{
-				rb_hash_aset(type_hash, rb_str_new2(td->elements[i].name),
-							 create_attribute_hash(schema_root, schema_base, type_root, type_base, &td->elements[i]));
+				VALUE attributes = create_attribute_hash(schema_root, schema_base, type_root, type_base, &td->elements[i]);
+				rb_hash_aset(type_hash, rb_str_new2(td->elements[i].name), attributes);
 			}
 		}
 	}
@@ -520,13 +523,11 @@ create_attribute_hash(VALUE schema_root, VALUE schema_base, VALUE type_root, VAL
 		/* XXXXX - fix this */
  		if (is_anonymous(element->type))
 		{
-				schema = define_type(schema_root, schema_base, type_root, type_base, element->type->symbol);
-				type   = rb_const_get(schema, rb_intern("CANDIDATE_TYPE"));
+				type = define_type(schema_root, schema_base, type_root, type_base, element->type->symbol);
 		}
 		else
 		{
-				schema = define_type(schema_root, schema_root, type_root, type_root, element->type->symbol);
-				type   = rb_const_get(schema, rb_intern("CANDIDATE_TYPE"));
+				type = define_type(schema_root, schema_root, type_root, type_root, element->type->symbol);
 		}
 	}
 
@@ -583,7 +584,7 @@ lookup_type(struct asn_TYPE_member_s *tms)
 		}
 		else
 		{
-			type = rb_const_get(schema_class, rb_intern("CANDIDATE_TYPE"));
+			type = rb_cString; /* rb_const_get(schema_class, rb_intern("CANDIDATE_TYPE")); */
 		}
 	}
 	
@@ -769,6 +770,7 @@ is_anonymous(asn_TYPE_descriptor_t *td)
 	return 0;
 }
 
+
 /******************************************************************************/
 /* class_name																  */
 /******************************************************************************/
@@ -794,15 +796,32 @@ class_name(asn_TYPE_descriptor_t *td)
 	return name;
 }
 
+
 /******************************************************************************/
-/* type_for_primitive														  */
+/* get_primitive_type														  */
 /******************************************************************************/
 VALUE
-type_for_primitive(int t)
+get_primitive_type(int t)
 {
 	VALUE type;
 
 	switch(t)
 	{
+		VALUE primitive_id;
+
+		case ASN1_TYPE_INTEGER :
+			type = rb_cFixnum;
+			break;
+
+		case ASN1_TYPE_IA5String :
+		case ASN1_TYPE_UTF8String :
+			type = rb_cString;
+			break;
+
+		default :
+			rb_raise(rb_eStandardError, "type_for_primitive(): can't find primitive type");
+			break;
 	}
+
+	return type;
 }
