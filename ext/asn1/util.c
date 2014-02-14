@@ -10,8 +10,6 @@
 #include "asn_application.h"
 #include "util.h"
 
-#include "ENUMERATED.h"
-
 
 /******************************************************************************/
 /* Forward declarations                                                       */
@@ -30,9 +28,8 @@ void	 define_enumerated(VALUE schema_root, VALUE type_class, asn_TYPE_descriptor
 VALUE	 get_schema_stub(VALUE schema_root, VALUE candidate_type, char *descriptor_symbol, char *name);
 VALUE	 get_type_stub(VALUE type_root, asn_TYPE_descriptor_t *td, char *name);
 void	 finalize_schema(VALUE schema_root, VALUE schema_base, VALUE type_root, VALUE type_class, asn_TYPE_descriptor_t *td);
-VALUE	 ruby_class_from_asn1_type(asn_TYPE_descriptor_t *td);
 void	 set_encoder_and_decoder(VALUE schema_class, int base_type);
-VALUE	 lookup_type(struct asn_TYPE_member_s *tms);
+VALUE	 lookup_type(asn_TYPE_descriptor_t *td);
 int		 consumeBytes(const void *buffer, size_t size, void *application_specific_key);
 int		 validate_encoding(VALUE encoding);
 VALUE	 get_schema_from_td_string(char *symbol);
@@ -316,7 +313,11 @@ finalize_schema(VALUE schema_root, VALUE schema_base, VALUE type_root, VALUE typ
 	if (td->base_type == ASN1_TYPE_SEQUENCE_OF || td->base_type == ASN1_TYPE_SET_OF)
 	{
 		asn_TYPE_descriptor_t *td2 = td->elements->type;
-		VALUE collection_type = ruby_class_from_asn1_type(td2);
+		VALUE collection_type = lookup_type(td2);
+		if (collection_type == Qnil)
+		{
+			collection_type = define_type(schema_root, schema_root, type_root, type_root, td2->symbol);
+		}
 
 		rb_define_const(schema_base, "COLLECTION", INT2FIX(1));
 		rb_define_const(schema_base, "COLLECTION_TYPE", collection_type);
@@ -339,53 +340,6 @@ finalize_schema(VALUE schema_root, VALUE schema_base, VALUE type_root, VALUE typ
 	rb_define_const(schema_base, "ATTRIBUTES", type_hash);
 
 	set_encoder_and_decoder(schema_base, td->base_type);
-}
-
-/******************************************************************************/
-/* ruby_class_from_asn1_type												  */
-/******************************************************************************/
-VALUE
-ruby_class_from_asn1_type(asn_TYPE_descriptor_t *td)
-{
-	VALUE type;
-	VALUE schema_class;
-
-	switch(td->base_type)
-	{
-		case ASN1_TYPE_INTEGER :
-			type = rb_cFixnum;
-			break;
-
-		case ASN1_TYPE_SEQUENCE :
-			type = get_schema_from_td_string(td->symbol);
-			if (type == Qnil)
-			{
-				rb_raise(rb_eException, "ruby_class_from_asn1_type(): can't locate SEQUENCE");
-			}
-			break;
-
-		case ASN1_TYPE_SEQUENCE_OF :
-			type = get_schema_from_td_string(td->symbol);
-			if (type == Qnil)
-			{
-				rb_raise(rb_eException, "ruby_class_from_asn1_type(): can't locate SEQUENCE OF");
-			}
-			break;
-
-		case ASN1_TYPE_CHOICE :
-			type = get_schema_from_td_string(td->symbol);
-			if (type == Qnil)
-			{
-				rb_raise(rb_eException, "ruby_class_from_asn1_type(): can't locate CHOICE");
-			}
-			break;
-
-		default :
-			rb_raise(rb_eException, "ruby_class_from_asn1_type(): can't locate type");
-			break;
-	}
-
-	return type;
 }
 
 
@@ -514,7 +468,7 @@ VALUE
 create_attribute_hash(VALUE schema_root, VALUE schema_base, VALUE type_root, VALUE type_base, struct asn_TYPE_member_s *element)
 {
 	VALUE attribute_hash = rb_hash_new();
-	VALUE type			 = lookup_type(element);
+	VALUE type			 = lookup_type(element->type);
 
 	if (type == Qnil)
 	{
@@ -543,13 +497,13 @@ create_attribute_hash(VALUE schema_root, VALUE schema_base, VALUE type_root, VAL
 /* lookup_type                                                                */
 /******************************************************************************/
 VALUE
-lookup_type(struct asn_TYPE_member_s *tms)
+lookup_type(asn_TYPE_descriptor_t *td)
 {
 	VALUE type;
 
-	if (tms->type->generated == 0)
+	if (td->generated == 0)
 	{
-		switch(tms->type->base_type)
+		switch(td->base_type)
 		{
 			case ASN1_TYPE_NULL :
 				type = rb_cNilClass;
@@ -578,13 +532,14 @@ lookup_type(struct asn_TYPE_member_s *tms)
 	}
 	else
 	{
-		VALUE schema_class = get_schema_from_td_string(tms->type->symbol);
+		VALUE schema_class = get_schema_from_td_string(td->symbol);
 		if (schema_class == Qnil) {
 			type = Qnil;
 		}
 		else
 		{
-			type = rb_cString; /* rb_const_get(schema_class, rb_intern("CANDIDATE_TYPE")); */
+			VALUE candidate = rb_intern("CANDIDATE_TYPE");
+			type = rb_const_get(schema_class, candidate);
 		}
 	}
 	
