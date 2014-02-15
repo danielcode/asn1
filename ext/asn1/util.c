@@ -10,6 +10,8 @@
 #include "asn_application.h"
 #include "util.h"
 
+#include "ENUMERATED.h" /* Required to defined asn_INTEGER_specifics_t */
+
 
 /******************************************************************************/
 /* Forward declarations                                                       */

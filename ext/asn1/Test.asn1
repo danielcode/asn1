@@ -16,6 +16,23 @@ TestModel DEFINITIONS ::= BEGIN -- Module parameters preamble
   RealTest  ::= REAL
   BoolTest  ::= BOOLEAN
   NullTest  ::= NULL
+  BmpString ::= BMPString
+  -- Iso64String   ::= ISO646String
+  Numericstring ::= NumericString
+  -- Objectdescriptor ::= ObjectDescriptor
+  ObjectIdentifier ::= OBJECT IDENTIFIER
+  OctetString      ::= OCTET STRING
+  Printablestring  ::= PrintableString
+  Relativeoid      ::= RELATIVE-OID
+  T61string        ::= T61String
+  Teletexstring    ::= TeletexString
+  UtcTime          ::= UTCTime
+  Universalstring  ::= UniversalString
+  Videotexstring   ::= VideotexString
+  Visiblestring    ::= VisibleString
+  Any              ::= ANY
+
+  BitString ::= BIT STRING
 
   TestChoice ::= CHOICE {
     int1 [0] INTEGER,
