@@ -41,7 +41,7 @@ void *enstruct_sequence_of(VALUE v,		 asn_TYPE_descriptor_t *td, void *container
 void *enstruct_choice(VALUE v,			 asn_TYPE_descriptor_t *td, void *container);
 
 void *enstruct_choice_value(VALUE value, asn_TYPE_descriptor_t *td, void *container, int id);
-void  enstruct_member(VALUE v, asn_TYPE_member_t *member, char **container);
+void  enstruct_member(VALUE v, asn_TYPE_member_t *member, char *container);
 
 static char *create_holding_struct(int size);
 static int	 get_id_of_choice(asn_TYPE_descriptor_t *td, VALUE choice);
@@ -294,7 +294,7 @@ enstruct_sequence(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 
 		internal_container = (char *)container + member->memb_offset;
 
-		enstruct_member(member_val, member, &internal_container);
+		enstruct_member(member_val, member, internal_container);
 	}
 
 	return container;
@@ -328,7 +328,7 @@ enstruct_sequence_of(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 		index		= INT2FIX(i);
 		element_val	= rb_funcall(v, rb_intern("[]"), 1, index);
 
-		enstruct_member(element_val, member, &element_container);
+		element_container = enstruct_object(element_val, member->type, NULL);
 		asn_sequence_add(container, element_container);
 	}
 
@@ -370,7 +370,7 @@ enstruct_choice_value(VALUE value, asn_TYPE_descriptor_t *td, void *container, i
 
 	char *value_container = (char *)container + member->memb_offset;
 
-	enstruct_member(value, member, &value_container);
+	enstruct_member(value, member, value_container);
 	set_presentation_value(container, specifics->pres_offset, specifics->pres_size, id + 1);
 
 	return container;
@@ -381,29 +381,30 @@ enstruct_choice_value(VALUE value, asn_TYPE_descriptor_t *td, void *container, i
 /* enstruct_member															  */
 /******************************************************************************/
 void
-enstruct_member(VALUE v, asn_TYPE_member_t *member, char **container)
+enstruct_member(VALUE v, asn_TYPE_member_t *member, char *container)
 {
 	/*
 	 * XXXXX - add explanation
 	 */
 	if (member->flags & ATF_POINTER)
 	{
+		char **real_container = (char **)container;
 		char *member_container = NULL;
 
 		if (member->optional && is_undefined(v, member->type->base_type))
 		{
-			*container = NULL;
+			*real_container = NULL;
 		}
 		else
 		{
 			member_container = calloc(1, member->type->container_size);
-			*container = member_container;
+			*real_container = member_container;
 			enstruct_object(v, member->type, member_container);
 		}
 	}
 	else
 	{
-		enstruct_object(v, member->type, *container);
+		enstruct_object(v, member->type, container);
 	}
 }
 
