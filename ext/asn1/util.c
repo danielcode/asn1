@@ -102,7 +102,7 @@ define_type(VALUE schema_root, VALUE schema_base, VALUE type_root, VALUE type_ba
 	rb_hash_aset(symbol_to_schema, rb_str_new2(descriptor_symbol), schema_class);
 
 	/*
-	 * 1. Define type, based on base ASN.1 type.
+	 * Define type, based on base ASN.1 type.
 	 */
 	switch(td->base_type)
 	{
@@ -133,12 +133,12 @@ define_type(VALUE schema_root, VALUE schema_base, VALUE type_root, VALUE type_ba
 	}
 
 	/*
-	 * 2. Create reference to schema class from type class
+	 * Create reference to schema class from type class
 	 */
 	rb_define_const(type_class, "ASN1_TYPE", rb_str_new2(descriptor_symbol));
 
 	/*
-	 * 3. Make schema class and type class refer to each other.
+	 * Make schema class and type class refer to each other.
 	 */
 	rb_define_const(type_class, "ASN1_SCHEMA", schema_class);
 

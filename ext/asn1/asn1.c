@@ -70,18 +70,6 @@ void Init_asn1()
 
 
 	/******************************************************************************/
-	/* Structured Types															  */
-	/******************************************************************************/
-	/*
-	cNewType		 = define_type(cSchema, cSchema, cType, "asn_DEF_SimpleSequence");
-	cTestChoice		 = define_type(cSchema, cSchema, cType, "asn_DEF_TestChoice");
-	cTestIntSequence = define_type(cSchema, cSchema, cType, "asn_DEF_TestIntSequence");
-	cTestEnumerated	 = define_type(cSchema, cSchema, cType, "asn_DEF_TestEnumerated");
-	cTestNested		 = define_type(cSchema, cSchema, cType, "asn_DEF_TestNested");
-	*/
-
-
-	/******************************************************************************/
 	/* Primitive Types															  */
 	/******************************************************************************/
 

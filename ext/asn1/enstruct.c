@@ -266,7 +266,8 @@ enstruct_utf8string(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 void *
 enstruct_enumerated(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 {
-	enstruct_integer(v, NULL, container);
+	VALUE val = rb_funcall(v, rb_intern("value"), 0, rb_ary_new2(0));
+	enstruct_integer(val, NULL, container);
 
 	return container;
 }
