@@ -3,6 +3,9 @@ ASN.1 for Ruby
 
 Currently early stage proof-of-concept.
 
+Requires modified version of asn1c, available here:
+https://github.com/danielcode/asn1c
+
 Works by wrapping C produced by asn1c.
 
 Creates a separate class for each ASN.1 type.
@@ -12,44 +15,41 @@ Supports subset of primitive types and these structured types:
 * SEQUENCE OF
 * CHOICE
 
-Requires modified version of asn1c, available here:
-https://github.com/danielcode/asn1c
-
 Status
 ------
-| ASN.1 Type        | Status      | Ruby Class            |
-|-------------------|-------------|-----------------------|
-| ANY               |             |                       |
-| BIT_STRING        |             |                       |
-| BMPString         |             |                       |
-| BOOLEAN           |             | Asn1::Type::Boolean   |
-| ENUMERATED        |             |                       |
-| GeneralString     |             |                       |
-| GeneralizedTime   |             |                       |
-| GraphicString     |             |                       |
-| IA5String         |             | Asn1::Type::IA5String |
-| INTEGER           |             | Asn1::Type::Integer   |
-| ISO646String      |             |                       |
-| NULL              |             | Asn1::Type::Null      |
-| NumericString     |             |                       |
-| OBJECT_IDENTIFIER |             |                       |
-| OCTET_STRING      |             |                       |
-| ObjectDescriptor  |             |                       |
-| PrintableString   |             |                       |
-| REAL              |             | Asn1::Type::Real      |
-| RELATIVE-OID      |             |                       |
-| T61String         |             |                       |
-| TeletexString     |             |                       |
-| UTCTime           |             |                       |
-| UTF8String        |             |                       |
-| UniversalString   |             |                       |
-| VideotexString    |             |                       |
-| VisibleString     |             |                       |
-| CHOICE            |             |                       |
-| SEQUENCE          |             |                       |
-| SEQUENCE_OF       |             |                       |
-| SET               |             |                       |
-| SET_OF            |             |                       |
+| ASN.1 Type        | Status          | Ruby Class             |
+|-------------------|-----------------|------------------------|
+| ANY               | Not Implemented |                        |
+| BIT_STRING        | Not Implemented |                        |
+| BMPString         | Not Implemented |                        |
+| BOOLEAN           | Implemented     | Asn1::Type::Boolean    |
+| ENUMERATED        | Implemented     | N/A                    |
+| GeneralString     | Not Implemented |                        |
+| GeneralizedTime   | Not Implemented |                        |
+| GraphicString     | Not Implemented |                        |
+| IA5String         | Implemented     | Asn1::Type::IA5String  |
+| INTEGER           | Implemented     | Asn1::Type::Integer    |
+| ISO646String      | Not Implemented |                        |
+| NULL              | Implemented     | Asn1::Type::Null       |
+| NumericString     | Not Implemented |                        |
+| OBJECT_IDENTIFIER | Not Implemented |                        |
+| OCTET_STRING      | Not Implemented |                        |
+| ObjectDescriptor  | Not Implemented |                        |
+| PrintableString   | Not Implemented |                        |
+| REAL              | Not Implemented | Asn1::Type::Real       |
+| RELATIVE-OID      | Not Implemented |                        |
+| T61String         | Not Implemented |                        |
+| TeletexString     | Not Implemented |                        |
+| UTCTime           | Not Implemented |                        |
+| UTF8String        | Implemented     | Asn1::Type::UTF8String |
+| UniversalString   | Not Implemented |                        |
+| VideotexString    | Not Implemented |                        |
+| VisibleString     | Not Implemented |                        |
+| CHOICE            | Implemented     | N/A                    |
+| SEQUENCE          | Implemented     | N/A                    |
+| SEQUENCE_OF       | Implemented     | N/A                    |
+| SET               | Not Implemented | N/A                    |
+| SET_OF            | Not Implemented | N/A                    |
 
 
 Building
@@ -100,9 +100,6 @@ Using
 
 Now, try decoding the base64 encoded string here: http://www.lapo.it/asn1js/
 
-
-Classes
--------
 
 Exclusions
 ----------
