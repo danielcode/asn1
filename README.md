@@ -78,15 +78,15 @@ Example Usage
     $ irb
     > require 'asn1/asn1'
     => true
-    > encoded = Asn1::Integer.encode :ber, 1234567890
+    > encoded = Asn1::Integer.encode :der, 1234567890
     => "\x02\x04I\x96\x02\xD2"
-    > Asn1::Integer.decode :ber, encoded
+    > Asn1::Integer.decode :der, encoded
     => 1234567890
 
 ### IA5String
-    > encoded = Asn1::IA5String.encode :ber, 'Hello, world!'
+    > encoded = Asn1::IA5String.encode :der, 'Hello, world!'
     => "\x16\rHello, world!"
-    > Asn1::IA5String.decode :ber, encoded
+    > Asn1::IA5String.decode :der, encoded
     => "Hello, world!"
 
 ### Sample Sequence
@@ -122,13 +122,14 @@ Primitive types currently include:
 * Asn1::Type::Real
 * Asn1::Type::UTF8String
 
-All primitive types (and their direct descendants) have two class methods:
+All primitive types  have two class methods:
 * encode(format, object)
 * decode(format, object)
 where format is one of :xer, :der or :per.  However, :per does not currently work.
 
 #### Primitive Type Aliases
 Each type alias in an ASN.1 module maps to a type under Asn1::Type.
+
 E.g. MyInt ::= INTEGER => Asn1::Type::MyInt
 
 ### Complex Types
