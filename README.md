@@ -15,6 +15,9 @@ Supports subset of primitive types and these structured types:
 * SEQUENCE OF
 * CHOICE
 
+
+
+
 Status
 ------
 | ASN.1 Type        | Status          | Ruby Class             |
@@ -52,6 +55,8 @@ Status
 | SET_OF            | Not Implemented | N/A                    |
 
 
+
+
 Building
 --------
 * asn1c must be in your path
@@ -64,8 +69,11 @@ Building
 4. rake compile
 5. rake install_gem
 
-Using
--------
+
+
+
+Example Usage
+-------------
 ### Integer
     $ irb
     > require 'asn1/asn1'
@@ -100,3 +108,35 @@ Using
 
 Now, try decoding the base64 encoded string here: http://www.lapo.it/asn1js/
 
+
+Type Classes
+------------
+Types are held under Asn1::Type.  They include all primitive types and types defined by the user.
+
+### Primitive Types
+Primitive types currently include:
+* Asn1::Type::Boolean
+* Asn1::Type::IA5String
+* Asn1::Type::Integer
+* Asn1::Type::Null
+* Asn1::Type::Real
+* Asn1::Type::UTF8String
+
+All primitive types (and their direct descendants) have two class methods:
+* encode(format, object)
+* decode(format, object)
+where format is one of :xer, :der or :per.  However, :per does not currently work.
+
+#### Primitive Type Aliases
+Each type alias in an ASN.1 module maps to a type under Asn1::Type.
+E.g. MyInt ::= INTEGER => Asn1::Type::MyInt
+
+### Complex Types
+
+Complex types have an associated schema, defined under Asn1::Schema
+
+#### SEQUENCE
+
+#### SEQUENCE_OF
+
+#### ENUMERATED
