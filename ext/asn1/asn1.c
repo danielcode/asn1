@@ -16,7 +16,7 @@ void Init_asn1()
 	VALUE mAsn1, mError, cAsn1, cSchema, cType;
 	VALUE cEncoderTypeError;
 	VALUE cInteger, cReal, cBoolean, cNull, cIA5String, cUTF8String, cNumericString;
-	VALUE cVisibleString;
+	VALUE cUniversalString, cVisibleString;
 	VALUE cUndefined;
 
 	VALUE cSymbolToSchema = rb_hash_new();;
@@ -111,6 +111,14 @@ void Init_asn1()
 
 	rb_define_singleton_method(cNumericString, "encode", encode_numericstring, 2);
 	rb_define_singleton_method(cNumericString, "decode", decode_numericstring, 2);
+
+	/*
+	 * UniversalString
+	 */
+	cUniversalString = rb_define_class_under(cType, "UniversalString", rb_cObject);
+
+	rb_define_singleton_method(cUniversalString, "encode", encode_universalstring, 2);
+	rb_define_singleton_method(cUniversalString, "decode", decode_universalstring, 2);
 
 	/*
 	 * VisibleString

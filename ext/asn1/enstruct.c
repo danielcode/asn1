@@ -92,6 +92,10 @@ enstruct_object_to_memory(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 			enstruct_numericstring(v, td, container);
 			break;
 
+		case ASN1_TYPE_UniversalString :
+			enstruct_universalstring(v, td, container);
+			break;
+
 		case ASN1_TYPE_VisibleString :
 			enstruct_visiblestring(v, td, container);
 			break;
@@ -263,6 +267,17 @@ enstruct_utf8string(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 /******************************************************************************/
 void *
 enstruct_numericstring(VALUE v, asn_TYPE_descriptor_t *td, void *container)
+{
+	return enstruct_ia5string(v, td, container);
+}
+
+
+/******************************************************************************/
+/* UniversalString															  */
+/* Note: assuming OCTET_STRING is constant length							  */
+/******************************************************************************/
+void *
+enstruct_universalstring(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 {
 	return enstruct_ia5string(v, td, container);
 }

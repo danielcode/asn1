@@ -29,7 +29,7 @@ extern asn_TYPE_descriptor_t asn_DEF_VisibleString;
 VALUE
 encode_visiblestring(VALUE class, VALUE encoder, VALUE v)
 {
-	void  *s = enstruct_object(v, &asn_DEF_VisibleString, NULL);
+	void *s = enstruct_object(v, &asn_DEF_VisibleString, NULL);
 	check_constraints(&asn_DEF_VisibleString, s);
 	return asn1_encode_object(&asn_DEF_VisibleString, encoder, s);
 }

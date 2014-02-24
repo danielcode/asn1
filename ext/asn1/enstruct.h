@@ -15,6 +15,7 @@ extern void *enstruct_null(VALUE v,				asn_TYPE_descriptor_t *td, void *containe
 extern void *enstruct_ia5string(VALUE v,		asn_TYPE_descriptor_t *td, void *container);
 extern void *enstruct_utf8string(VALUE v,		asn_TYPE_descriptor_t *td, void *container);
 extern void *enstruct_numericstring(VALUE v,	asn_TYPE_descriptor_t *td, void *container);
+extern void *enstruct_universalstring(VALUE v,	asn_TYPE_descriptor_t *td, void *container);
 extern void *enstruct_visiblestring(VALUE v,	asn_TYPE_descriptor_t *td, void *container);
 extern void *enstruct_enumerated(VALUE v,		asn_TYPE_descriptor_t *td, void *container);
 extern void *enstruct_sequence(VALUE v,			asn_TYPE_descriptor_t *td, void *container);

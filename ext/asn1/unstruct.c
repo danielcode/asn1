@@ -9,6 +9,7 @@
 #include "expr_types.h"
 
 #include "util.h"
+#include "unstruct.h"
 
 #include "INTEGER.h"
 #include "REAL.h"
@@ -18,6 +19,7 @@
 #include "IA5String.h"
 #include "UTF8String.h"
 #include "NumericString.h"
+#include "UniversalString.h"
 #include "VisibleString.h"
 #include "constr_CHOICE.h"
 #include "asn_SEQUENCE_OF.h"
@@ -27,29 +29,10 @@
 /******************************************************************************/
 /* Forward declarations														  */
 /******************************************************************************/
-VALUE unstruct_object(asn_TYPE_descriptor_t *td,		char *container);
-
-VALUE unstruct_integer(asn_TYPE_descriptor_t *td,		char *container);
-VALUE unstruct_real(asn_TYPE_descriptor_t *td,			char *container);
-VALUE unstruct_boolean(asn_TYPE_descriptor_t *td,		char *container);
-VALUE unstruct_null(asn_TYPE_descriptor_t *td,			char *container);
-VALUE unstruct_ia5string(asn_TYPE_descriptor_t *td,		char *container);
-VALUE unstruct_utf8string(asn_TYPE_descriptor_t *td,	char *container);
-VALUE unstruct_numericstring(asn_TYPE_descriptor_t *td,	char *container);
-VALUE unstruct_visiblestring(asn_TYPE_descriptor_t *td,	char *container);
-
-VALUE unstruct_sequence(asn_TYPE_descriptor_t *td,		char *container);
-VALUE unstruct_sequence_of(asn_TYPE_descriptor_t *td,	char *container);
-VALUE unstruct_choice(asn_TYPE_descriptor_t *td,		char *container);
-VALUE unstruct_enumerated(asn_TYPE_descriptor_t *td,	char *container);
-
 VALUE instance_of_undefined(void); 
-
-void  unstruct_member(VALUE v, asn_TYPE_member_t *member, char *buffer);
 
 int	get_presentation_value(char *buffer, int offset, int pres_size);
 static char *setter_name_from_member_name(char *name);
-
 
 /******************************************************************************/
 /* Externals																  */
@@ -81,6 +64,14 @@ unstruct_object(asn_TYPE_descriptor_t *td, char *container)
 
 		case ASN1_TYPE_NumericString :
 			v = unstruct_numericstring(td, container);
+			break;
+
+		case ASN1_TYPE_UniversalString :
+			v = unstruct_universalstring(td, container);
+			break;
+
+		case ASN1_TYPE_VisibleString :
+			v = unstruct_visiblestring(td, container);
 			break;
 
 		case ASN1_TYPE_REAL :
@@ -200,6 +191,18 @@ unstruct_numericstring(asn_TYPE_descriptor_t *td, char *container)
 	NumericString_t *numericstring = (NumericString_t *)container;
 
 	return rb_str_new(numericstring->buf, numericstring->size);
+}
+
+
+/******************************************************************************/
+/* UniversalString															  */
+/******************************************************************************/
+VALUE
+unstruct_universalstring(asn_TYPE_descriptor_t *td, char *container)
+{
+	UniversalString_t *universalstring = (UniversalString_t *)container;
+
+	return rb_str_new(universalstring->buf, universalstring->size);
 }
 
 

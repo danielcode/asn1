@@ -25,7 +25,7 @@ extern asn_TYPE_descriptor_t asn_DEF_BOOLEAN;
 VALUE
 encode_boolean(VALUE class, VALUE encoder, VALUE v)
 {
-	void  *s = enstruct_object(v, &asn_DEF_BOOLEAN, NULL);
+	void *s = enstruct_object(v, &asn_DEF_BOOLEAN, NULL);
 	check_constraints(&asn_DEF_BOOLEAN, s);
 	return asn1_encode_object(&asn_DEF_BOOLEAN, encoder, s);
 }

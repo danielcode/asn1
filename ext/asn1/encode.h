@@ -7,6 +7,7 @@ extern VALUE encode_null(VALUE class, VALUE encoder, VALUE v);
 extern VALUE encode_ia5string(VALUE class, VALUE encoder, VALUE v);
 extern VALUE encode_utf8string(VALUE class, VALUE encoder, VALUE v);
 extern VALUE encode_numericstring(VALUE class, VALUE encoder, VALUE v);
+extern VALUE encode_universalstring(VALUE class, VALUE encoder, VALUE v);
 extern VALUE encode_visiblestring(VALUE class, VALUE encoder, VALUE v);
 
 extern VALUE encode_sequence(VALUE class, VALUE encoder, VALUE v);

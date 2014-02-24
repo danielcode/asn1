@@ -27,7 +27,7 @@ extern asn_TYPE_descriptor_t asn_DEF_INTEGER;
 VALUE
 encode_int(VALUE class, VALUE encoder, VALUE v)
 {
-	void  *s = enstruct_object(v, &asn_DEF_INTEGER, NULL);
+	void *s = enstruct_object(v, &asn_DEF_INTEGER, NULL);
 	check_constraints(&asn_DEF_INTEGER, s);
 	return asn1_encode_object(&asn_DEF_INTEGER, encoder, s);
 }
