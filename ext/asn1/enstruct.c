@@ -47,14 +47,14 @@ static char *create_holding_struct(int size);
 static int	 get_id_of_choice(asn_TYPE_descriptor_t *td, VALUE choice);
 VALUE		 get_choice_value_sym(VALUE choice);
 VALUE		 get_choice_value(VALUE choice, VALUE sym);
+VALUE		 get_optional_value(VALUE v, asn_TYPE_member_t *member);
 void		 set_presentation_value(char *holding_struct, int pres_offset, int pres_size, int id);
+int	 		 is_undefined(VALUE v, int base_type);
 
 
 /******************************************************************************/
 /* Externals																  */
 /******************************************************************************/
-extern int	 is_undefined(VALUE v, int base_type);
-extern VALUE get_optional_value(VALUE v, asn_TYPE_member_t *member);
 
 
 /******************************************************************************/
@@ -501,4 +501,43 @@ set_presentation_value(char *holding_struct, int pres_offset, int pres_size, int
 	int *pres_ptr = (int *)(holding_struct + pres_offset);
 
 	*pres_ptr = id;
+}
+
+
+/******************************************************************************/
+/* is_undefined																  */
+/******************************************************************************/
+int
+is_undefined(VALUE v, int base_type)
+{
+	const char *c = rb_obj_classname(v);
+	if (strcmp(c, "Asn1::Undefined") == 0)
+	{
+		return 1;
+	}
+
+	if ((TYPE(v) == T_NIL) && (base_type != ASN1_TYPE_NULL))
+	{
+		return 1;
+	}
+
+
+	return 0;
+}
+
+
+/******************************************************************************/
+/* get_optional_value														  */
+/******************************************************************************/
+VALUE
+get_optional_value(VALUE v, asn_TYPE_member_t *member)
+{
+	VALUE memb = rb_funcall(v, rb_intern(member->name), 0, rb_ary_new2(0));
+
+	if (is_undefined(v, member->type->base_type) && !member->optional)
+	{
+		rb_raise(rb_eStandardError, "Value absent, but not optional");
+	}
+
+	return memb;
 }

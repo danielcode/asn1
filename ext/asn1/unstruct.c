@@ -39,6 +39,8 @@ VALUE unstruct_sequence_of(asn_TYPE_descriptor_t *td,	char *container);
 VALUE unstruct_choice(asn_TYPE_descriptor_t *td,		char *container);
 VALUE unstruct_enumerated(asn_TYPE_descriptor_t *td,	char *container);
 
+VALUE instance_of_undefined(void); 
+
 void  unstruct_member(VALUE v, asn_TYPE_member_t *member, char *buffer);
 
 int	get_presentation_value(char *buffer, int offset, int pres_size);
@@ -48,7 +50,6 @@ static char *setter_name_from_member_name(char *name);
 /******************************************************************************/
 /* Externals																  */
 /******************************************************************************/
-extern VALUE instance_of_undefined(void); 
 extern VALUE get_schema_from_td_string(char *symbol);
 
 
@@ -371,4 +372,20 @@ get_presentation_value(char *buffer, int offset, int pres_size)
 	int  index	  = *pres_ptr;
 
     return index - 1;
+}
+
+
+/******************************************************************************/
+/* instance_of_undefined													  */
+/******************************************************************************/
+VALUE
+instance_of_undefined(void)
+{
+	ID asn_module_id	  = rb_intern("Asn1");
+    ID undefined_class_id = rb_intern("Undefined");
+
+	VALUE asn_module	  = rb_const_get(rb_cObject, asn_module_id);
+	VALUE undefined_class = rb_const_get(asn_module, undefined_class_id);
+
+	return rb_funcall(undefined_class, rb_intern("instance"), 0, rb_ary_new2(0));
 }

@@ -11,7 +11,7 @@
 /* Forward declarations														  */
 /******************************************************************************/
 char  *encoder_string(VALUE encoder);
-
+int	   consumeBytes(const void *buffer, size_t size, void *application_specific_key);
 
 /******************************************************************************/
 /* Externals																  */
@@ -121,4 +121,68 @@ encoder_string(VALUE encoder)
 	VALUE symbol_as_string = rb_funcall(encoder, rb_intern("to_s"), 0, rb_ary_new2(0));
 
 	return RSTRING_PTR(symbol_as_string);
+}
+
+
+/******************************************************************************/
+/* consume_bytes                                                              */
+/******************************************************************************/
+int
+consumeBytes(const void *buffer, size_t size, void *application_specific_key)
+{
+	bufferInfo_t *bufferInfo = (bufferInfo_t *)application_specific_key;
+
+	memcpy((void *)(bufferInfo->buffer + bufferInfo->offset), buffer, size);
+
+	bufferInfo->offset += size;
+
+	return 0;
+}
+
+
+/******************************************************************************/
+/* validate_encoding														  */
+/* XXXXX - unused at 2014-02-23												  */
+/******************************************************************************/
+int
+validate_encoding(VALUE encoding)
+{
+	int val;
+
+	ID		asn_module_id, asn_error_module_id, asn_encoder_error_id;
+	VALUE	asn_module,    asn_error_module,    asn_encoder_error;
+	VALUE	error, argv[0];
+
+	VALUE  symbol_as_string = rb_funcall(encoding, rb_intern("to_s"), 0, rb_ary_new2(0));
+	char  *encoder = RSTRING_PTR(symbol_as_string);
+
+	val = strcmp(encoder, "ber");
+	if (val == 0)
+	{
+		return 1;
+	}
+	else if (strcmp(encoder, "der") == 0)
+	{
+		return 1;
+	}
+	else if (strcmp(encoder, "per") == 0)
+	{
+		return 1;
+	}
+	else if (strcmp(encoder, "xer") == 0)
+	{
+		return 1;
+	}
+
+	asn_module_id 			= rb_intern("Asn1");
+	asn_error_module_id		= rb_intern("Error");
+	asn_encoder_error_id	= rb_intern("EncoderTypeError");
+
+	asn_module			= rb_const_get(rb_cObject, asn_module_id);
+	asn_error_module	= rb_const_get(asn_module, asn_error_module_id);
+	asn_encoder_error	= rb_const_get(asn_error_module, asn_encoder_error_id);
+
+	rb_raise(error, "Invalid encoding");
+
+	return 0;
 }
