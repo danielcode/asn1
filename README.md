@@ -100,9 +100,3 @@ Using
 
 Now, try decoding the base64 encoded string here: http://www.lapo.it/asn1js/
 
-
-Exclusions
-----------
-* Doesn't handle ambiguous CHOICE elements
-* Doesn't handle anonymous SEQUENCEs
-* Currently no consideration of Information Object Classes
