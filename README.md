@@ -47,7 +47,7 @@ Status
 | UTF8String        | Implemented     | Asn1::Type::UTF8String    |
 | UniversalString   | Not Implemented |                           |
 | VideotexString    | Not Implemented |                           |
-| VisibleString     | Not Implemented |                           |
+| VisibleString     | Implemented     | Asn1::Type::VisibleString |
 | CHOICE            | Implemented     | N/A                       |
 | SEQUENCE          | Implemented     | N/A                       |
 | SEQUENCE_OF       | Implemented     | N/A                       |

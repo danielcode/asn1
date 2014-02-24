@@ -18,6 +18,7 @@
 #include "IA5String.h"
 #include "UTF8String.h"
 #include "NumericString.h"
+#include "VisibleString.h"
 #include "constr_CHOICE.h"
 #include "asn_SEQUENCE_OF.h"
 #include "ENUMERATED.h"
@@ -35,6 +36,7 @@ VALUE unstruct_null(asn_TYPE_descriptor_t *td,			char *container);
 VALUE unstruct_ia5string(asn_TYPE_descriptor_t *td,		char *container);
 VALUE unstruct_utf8string(asn_TYPE_descriptor_t *td,	char *container);
 VALUE unstruct_numericstring(asn_TYPE_descriptor_t *td,	char *container);
+VALUE unstruct_visiblestring(asn_TYPE_descriptor_t *td,	char *container);
 
 VALUE unstruct_sequence(asn_TYPE_descriptor_t *td,		char *container);
 VALUE unstruct_sequence_of(asn_TYPE_descriptor_t *td,	char *container);
@@ -198,6 +200,18 @@ unstruct_numericstring(asn_TYPE_descriptor_t *td, char *container)
 	NumericString_t *numericstring = (NumericString_t *)container;
 
 	return rb_str_new(numericstring->buf, numericstring->size);
+}
+
+
+/******************************************************************************/
+/* VisibleString															  */
+/******************************************************************************/
+VALUE
+unstruct_visiblestring(asn_TYPE_descriptor_t *td, char *container)
+{
+	VisibleString_t *visiblestring = (VisibleString_t *)container;
+
+	return rb_str_new(visiblestring->buf, visiblestring->size);
 }
 
 

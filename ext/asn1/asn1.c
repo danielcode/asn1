@@ -2,29 +2,11 @@
 /* Include Files															  */
 /******************************************************************************/
 #include <ruby.h>
-
-/******************************************************************************/
-/* Externals																  */
-/******************************************************************************/
-extern VALUE traverse_type(VALUE class, VALUE name);
-extern VALUE define_type_from_ruby(VALUE class, VALUE schema_root, VALUE schema_base, VALUE type_root, VALUE symbol);
-
-
-extern VALUE encode_int(VALUE class, VALUE encoder, VALUE v);
-extern VALUE decode_int(VALUE class, VALUE encoder, VALUE byte_string);
-extern VALUE encode_real(VALUE class, VALUE encoder, VALUE v);
-extern VALUE decode_real(VALUE class, VALUE encoder, VALUE byte_string);
-extern VALUE encode_boolean(VALUE class, VALUE encoder, VALUE v);
-extern VALUE decode_boolean(VALUE class, VALUE encoder, VALUE byte_string);
-extern VALUE encode_null(VALUE class, VALUE encoder, VALUE v);
-extern VALUE decode_null(VALUE class, VALUE encoder, VALUE byte_string);
-extern VALUE encode_ia5string(VALUE class, VALUE encoder, VALUE v);
-extern VALUE decode_ia5string(VALUE class, VALUE encoder, VALUE byte_string);
-extern VALUE encode_utf8string(VALUE class, VALUE encoder, VALUE v);
-extern VALUE decode_utf8string(VALUE class, VALUE encoder, VALUE byte_string);
-extern VALUE encode_numericstring(VALUE class, VALUE encoder, VALUE v);
-extern VALUE decode_numericstring(VALUE class, VALUE encoder, VALUE byte_string);
-
+#include "asn_application.h"
+#include "util.h"
+#include "define_type.h"
+#include "encode.h"
+#include "decode.h"
 
 /******************************************************************************/
 /* Init_asn1																  */
@@ -34,6 +16,7 @@ void Init_asn1()
 	VALUE mAsn1, mError, cAsn1, cSchema, cType;
 	VALUE cEncoderTypeError;
 	VALUE cInteger, cReal, cBoolean, cNull, cIA5String, cUTF8String, cNumericString;
+	VALUE cVisibleString;
 	VALUE cUndefined;
 
 	VALUE cSymbolToSchema = rb_hash_new();;
@@ -128,4 +111,12 @@ void Init_asn1()
 
 	rb_define_singleton_method(cNumericString, "encode", encode_numericstring, 2);
 	rb_define_singleton_method(cNumericString, "decode", decode_numericstring, 2);
+
+	/*
+	 * VisibleString
+	 */
+	cVisibleString = rb_define_class_under(cType, "VisibleString", rb_cObject);
+
+	rb_define_singleton_method(cVisibleString, "encode", encode_visiblestring, 2);
+	rb_define_singleton_method(cVisibleString, "decode", decode_visiblestring, 2);
 }

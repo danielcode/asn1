@@ -7,17 +7,15 @@
 
 #include "asn_application.h"
 #include "ENUMERATED.h" /* Required to defined asn_INTEGER_specifics_t */
+#include "util.h"
 #include "encode.h"
+#include "decode.h"
+#include "define_type.h"
 
 
 /******************************************************************************/
 /* Forward declarations                                                       */
 /******************************************************************************/
-VALUE define_type_from_ruby(VALUE class, VALUE schema_root, VALUE schema_base, VALUE type_root, VALUE symbol);
-VALUE get_schema_from_td_string(char *symbol);
-
-asn_TYPE_descriptor_t *asn1_get_td_from_schema(VALUE class);
-
 static VALUE	 define_type(VALUE schema_root, VALUE schema_base, VALUE type_root, VALUE type_base, char *descriptor_symbol);
 static VALUE	 get_schema_stub(VALUE schema_root, VALUE candidate_type, char *descriptor_symbol, char *name);
 static VALUE	 get_type_stub(VALUE type_root, asn_TYPE_descriptor_t *td, char *name);

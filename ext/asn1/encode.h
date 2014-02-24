@@ -1,10 +1,16 @@
 #ifndef ENCODE_H
+#define ENCODE_H 1
+extern VALUE encode_int(VALUE class, VALUE encoder, VALUE v);
+extern VALUE encode_real(VALUE class, VALUE encoder, VALUE v);
+extern VALUE encode_boolean(VALUE class, VALUE encoder, VALUE v);
+extern VALUE encode_null(VALUE class, VALUE encoder, VALUE v);
+extern VALUE encode_ia5string(VALUE class, VALUE encoder, VALUE v);
+extern VALUE encode_utf8string(VALUE class, VALUE encoder, VALUE v);
+extern VALUE encode_numericstring(VALUE class, VALUE encoder, VALUE v);
+extern VALUE encode_visiblestring(VALUE class, VALUE encoder, VALUE v);
+
 extern VALUE encode_sequence(VALUE class, VALUE encoder, VALUE v);
-extern VALUE decode_sequence(VALUE class, VALUE encoder, VALUE sequence);
 extern VALUE encode_sequence_of(VALUE class, VALUE encoder, VALUE v);
-extern VALUE decode_sequence_of(VALUE class, VALUE encoder, VALUE sequence);
 extern VALUE encode_choice(VALUE class, VALUE encoder, VALUE v);
-extern VALUE decode_choice(VALUE class, VALUE encoder, VALUE byte_string);
 extern VALUE encode_enumerated(VALUE class, VALUE encoder, VALUE v);
-extern VALUE decode_enumerated(VALUE class, VALUE encoder, VALUE byte_string);
 #endif
