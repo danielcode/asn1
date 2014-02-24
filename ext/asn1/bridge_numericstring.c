@@ -1,13 +1,11 @@
 /******************************************************************************/
 /* Include Files															  */
 /******************************************************************************/
-#define BRIDGE_C 1
-
 #include <stdlib.h>
 #include <ruby.h>
 
 #include "asn_application.h"
-#include "UTF8String.h"
+#include "NumericString.h"
 
 #include "bridge.h"
 #include "enstruct.h"
@@ -22,29 +20,29 @@
 /******************************************************************************/
 /* Externals																  */
 /******************************************************************************/
-extern asn_TYPE_descriptor_t asn_DEF_UTF8String;
+extern asn_TYPE_descriptor_t asn_DEF_NumericString;
 
 
 /******************************************************************************/
-/* encode_utf8string													  	  */
+/* encode_numericstring													  	  */
 /******************************************************************************/
 VALUE
-encode_utf8string(VALUE class, VALUE encoder, VALUE v)
+encode_numericstring(VALUE class, VALUE encoder, VALUE v)
 {
-	void *s = enstruct_object(v, &asn_DEF_UTF8String, NULL);
-	check_constraints(&asn_DEF_UTF8String, s);
-	return asn1_encode_object(&asn_DEF_UTF8String, encoder, s);
+	void *s = enstruct_object(v, &asn_DEF_NumericString, NULL);
+	check_constraints(&asn_DEF_NumericString, s);
+	return asn1_encode_object(&asn_DEF_NumericString, encoder, s);
 }
 
 
 /******************************************************************************/
-/* decode_utf8string														  	  */
+/* decode_numericstring													  	  */
 /******************************************************************************/
 VALUE
-decode_utf8string(VALUE class, VALUE encoder, VALUE byte_string)
+decode_numericstring(VALUE class, VALUE encoder, VALUE byte_string)
 {
-	void *container = asn1_decode_object(&asn_DEF_UTF8String, encoder, byte_string);
-	VALUE val = unstruct_object(&asn_DEF_UTF8String, container);
+	void *container = asn1_decode_object(&asn_DEF_NumericString, encoder, byte_string);
+	VALUE val = unstruct_object(&asn_DEF_NumericString, container);
 
 	return val;
 }

@@ -27,10 +27,9 @@ extern asn_TYPE_descriptor_t asn_DEF_REAL;
 VALUE
 encode_real(VALUE class, VALUE encoder, VALUE v)
 {
-	void  *s		= enstruct_object(v, &asn_DEF_REAL, NULL);
-	VALUE  encoded	= asn1_encode_object(&asn_DEF_REAL, encoder, s);
-
-	return encoded;
+	void *s = enstruct_object(v, &asn_DEF_REAL, NULL);
+	check_constraints(&asn_DEF_REAL, s);
+	return asn1_encode_object(&asn_DEF_REAL, encoder, s);
 }
 
 

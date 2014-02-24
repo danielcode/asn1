@@ -1,44 +1,49 @@
 /******************************************************************************/
 /* Include Files															  */
 /******************************************************************************/
-#define BRIDGE_C 1
-
 #include <stdlib.h>
 #include <ruby.h>
 
 #include "asn_application.h"
-#include "BOOLEAN.h"
-
 #include "bridge.h"
-#include "enstruct.h"
-#include "unstruct.h"
+
+/******************************************************************************/
+/* Defines																	  */
+/******************************************************************************/
+#define BUFSIZE 1024
+
 
 /******************************************************************************/
 /* Externals																  */
 /******************************************************************************/
-extern asn_TYPE_descriptor_t asn_DEF_BOOLEAN;
+extern asn_TYPE_descriptor_t asn_DEF_REAL;
+
 
 /******************************************************************************/
-/* encode_bool																  */
-/* Convert a ruby FIXNUM to the nominated encoding.							  */
+/* check_constraints														  */
+/* Convert a ruby FLOAT to the nominated encoding.							  */
 /******************************************************************************/
-VALUE
-encode_boolean(VALUE class, VALUE encoder, VALUE v)
+void
+check_constraints(asn_TYPE_descriptor_t *td, void *s)
 {
-	void  *s = enstruct_object(v, &asn_DEF_BOOLEAN, NULL);
-	check_constraints(&asn_DEF_BOOLEAN, s);
-	return asn1_encode_object(&asn_DEF_BOOLEAN, encoder, s);
-}
+	int	   ret;
+	size_t buflen = BUFSIZE;
 
+	char *buffer = (char *)calloc(buflen, sizeof(char));
+	if (buffer == NULL)
+	{
+		rb_raise(rb_eException, "Can't allocate buffer to check constraints");
+	}
 
-/******************************************************************************/
-/* decode_bool																  */
-/******************************************************************************/
-VALUE
-decode_boolean(VALUE class, VALUE encoder, VALUE byte_string)
-{
-	void *container = asn1_decode_object(&asn_DEF_BOOLEAN, encoder, byte_string);
-	VALUE val = unstruct_object(&asn_DEF_BOOLEAN, container);
+	ret = asn_check_constraints(td, s, buffer, &buflen);
+	if (ret == -1)
+	{
+		/* Don't leak memory */
+		VALUE exception = rb_exc_new2(rb_eException, buffer);
+		free(buffer);
+		rb_exc_raise(exception);
+		return;
+	}
 
-	return val;
+	free(buffer);
 }

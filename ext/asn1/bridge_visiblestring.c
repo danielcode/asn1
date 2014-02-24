@@ -1,13 +1,11 @@
 /******************************************************************************/
 /* Include Files															  */
 /******************************************************************************/
-#define BRIDGE_C 1
-
 #include <stdlib.h>
 #include <ruby.h>
 
 #include "asn_application.h"
-#include "UTF8String.h"
+#include "VisibleString.h"
 
 #include "bridge.h"
 #include "enstruct.h"
@@ -22,29 +20,29 @@
 /******************************************************************************/
 /* Externals																  */
 /******************************************************************************/
-extern asn_TYPE_descriptor_t asn_DEF_UTF8String;
+extern asn_TYPE_descriptor_t asn_DEF_VisibleString;
 
 
 /******************************************************************************/
-/* encode_utf8string													  	  */
+/* encode_visiblestring														  	  */
 /******************************************************************************/
 VALUE
-encode_utf8string(VALUE class, VALUE encoder, VALUE v)
+encode_visiblestring(VALUE class, VALUE encoder, VALUE v)
 {
-	void *s = enstruct_object(v, &asn_DEF_UTF8String, NULL);
-	check_constraints(&asn_DEF_UTF8String, s);
-	return asn1_encode_object(&asn_DEF_UTF8String, encoder, s);
+	void  *s = enstruct_object(v, &asn_DEF_VisibleString, NULL);
+	check_constraints(&asn_DEF_VisibleString, s);
+	return asn1_encode_object(&asn_DEF_VisibleString, encoder, s);
 }
 
 
 /******************************************************************************/
-/* decode_utf8string														  	  */
+/* decode_visiblestring														  	  */
 /******************************************************************************/
 VALUE
-decode_utf8string(VALUE class, VALUE encoder, VALUE byte_string)
+decode_visiblestring(VALUE class, VALUE encoder, VALUE byte_string)
 {
-	void *container = asn1_decode_object(&asn_DEF_UTF8String, encoder, byte_string);
-	VALUE val = unstruct_object(&asn_DEF_UTF8String, container);
+	void *container = asn1_decode_object(&asn_DEF_VisibleString, encoder, byte_string);
+	VALUE val = unstruct_object(&asn_DEF_VisibleString, container);
 
 	return val;
 }

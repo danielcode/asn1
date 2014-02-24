@@ -26,10 +26,9 @@ extern asn_TYPE_descriptor_t asn_DEF_NULL;
 VALUE
 encode_null(VALUE class, VALUE encoder, VALUE v)
 {
-	void  *s		= enstruct_object(v, &asn_DEF_NULL, NULL);
-	VALUE  encoded	= asn1_encode_object(&asn_DEF_NULL, encoder, s);
-
-	return encoded;
+	void  *s = enstruct_object(v, &asn_DEF_NULL, NULL);
+	check_constraints(&asn_DEF_NULL, s);
+	return asn1_encode_object(&asn_DEF_NULL, encoder, s);
 }
 
 

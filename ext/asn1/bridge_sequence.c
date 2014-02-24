@@ -49,7 +49,12 @@ encode_sequence(VALUE class, VALUE encoder, VALUE v)
 	s  = enstruct_object(v, td, NULL);
 
 	/*
-	 * 3. Perform encoding to specified serialization format (i.e. BER, DER, PER or XML)
+	 * 3. Check constraints
+	 */
+	check_constraints(td, s);
+
+	/*
+	 * 4. Perform encoding to specified serialization format (i.e. BER, DER, PER or XML)
 	 */
 	encoded	= asn1_encode_object(td, encoder, s);
 
