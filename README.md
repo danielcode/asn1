@@ -59,15 +59,20 @@ Status
 
 Building
 --------
-* asn1c must be in your path
-
-1. cd ext/asn1
-2. asn1c -fall-defs-global -fwide-types Test.asn1
+1. clone and install asn1c:
+   * git clone https://github.com/danielcode/asn1c.git
+   * cd asn1c
+   * ./configure --prefix=<some non-production path>
+   * make; make check; make install
+2. clone asn1:
+   * git clone https://github.com/danielcode/asn1.git
+3. cd asn1/ext/asn1
+4. asn1c -fall-defs-global -fwide-types Test.asn1
    * rm Makefile.am.sample
    * rm converter-sample.c
-3. cd ../..
-4. rake compile
-5. rake install_gem
+5. cd ../..
+6. rake compile
+7. rake install_gem
 
 
 
