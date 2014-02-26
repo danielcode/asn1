@@ -15,10 +15,13 @@
 #include "REAL.h"
 #include "BOOLEAN.h"
 #include "NULL.h"
+#include "OCTET_STRING.h"
 #include "IA5String.h"
 #include "UTF8String.h"
 #include "NumericString.h"
-#include "OCTET_STRING.h"
+#include "BMPString.h"
+#include "PrintableString.h"
+#include "TeletexString.h"
 #include "constr_CHOICE.h"
 #include "asn_SEQUENCE_OF.h"
 
@@ -98,6 +101,18 @@ enstruct_object_to_memory(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 
 		case ASN1_TYPE_VisibleString :
 			enstruct_visiblestring(v, td, container);
+			break;
+
+		case ASN1_TYPE_BMPString :
+			enstruct_bmpstring(v, td, container);
+			break;
+
+		case ASN1_TYPE_PrintableString :
+			enstruct_printablestring(v, td, container);
+			break;
+
+		case ASN1_TYPE_TeletexString :
+			enstruct_teletexstring(v, td, container);
 			break;
 
 		case ASN1_TYPE_REAL :
@@ -289,6 +304,39 @@ enstruct_universalstring(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 /******************************************************************************/
 void *
 enstruct_visiblestring(VALUE v, asn_TYPE_descriptor_t *td, void *container)
+{
+	return enstruct_ia5string(v, td, container);
+}
+
+
+/******************************************************************************/
+/* BMPString															  	  */
+/* Note: assuming OCTET_STRING is constant length							  */
+/******************************************************************************/
+void *
+enstruct_bmpstring(VALUE v, asn_TYPE_descriptor_t *td, void *container)
+{
+	return enstruct_ia5string(v, td, container);
+}
+
+
+/******************************************************************************/
+/* PrintableString															  */
+/* Note: assuming OCTET_STRING is constant length							  */
+/******************************************************************************/
+void *
+enstruct_printablestring(VALUE v, asn_TYPE_descriptor_t *td, void *container)
+{
+	return enstruct_ia5string(v, td, container);
+}
+
+
+/******************************************************************************/
+/* TeletexString															  */
+/* Note: assuming OCTET_STRING is constant length							  */
+/******************************************************************************/
+void *
+enstruct_teletexstring(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 {
 	return enstruct_ia5string(v, td, container);
 }

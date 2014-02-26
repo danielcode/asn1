@@ -9,6 +9,9 @@ extern VALUE encode_utf8string(VALUE class, VALUE encoder, VALUE v);
 extern VALUE encode_numericstring(VALUE class, VALUE encoder, VALUE v);
 extern VALUE encode_universalstring(VALUE class, VALUE encoder, VALUE v);
 extern VALUE encode_visiblestring(VALUE class, VALUE encoder, VALUE v);
+extern VALUE encode_bmpstring(VALUE class, VALUE encoder, VALUE v);
+extern VALUE encode_printablestring(VALUE class, VALUE encoder, VALUE v);
+extern VALUE encode_teletexstring(VALUE class, VALUE encoder, VALUE v);
 
 extern VALUE encode_sequence(VALUE class, VALUE encoder, VALUE v);
 extern VALUE encode_sequence_of(VALUE class, VALUE encoder, VALUE v);

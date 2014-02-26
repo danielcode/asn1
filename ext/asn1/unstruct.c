@@ -21,6 +21,9 @@
 #include "NumericString.h"
 #include "UniversalString.h"
 #include "VisibleString.h"
+#include "BMPString.h"
+#include "PrintableString.h"
+#include "TeletexString.h"
 #include "constr_CHOICE.h"
 #include "asn_SEQUENCE_OF.h"
 #include "ENUMERATED.h"
@@ -72,6 +75,18 @@ unstruct_object(asn_TYPE_descriptor_t *td, char *container)
 
 		case ASN1_TYPE_VisibleString :
 			v = unstruct_visiblestring(td, container);
+			break;
+
+		case ASN1_TYPE_BMPString :
+			v = unstruct_bmpstring(td, container);
+			break;
+
+		case ASN1_TYPE_PrintableString :
+			v = unstruct_printablestring(td, container);
+			break;
+
+		case ASN1_TYPE_TeletexString :
+			v = unstruct_teletexstring(td, container);
 			break;
 
 		case ASN1_TYPE_REAL :
@@ -215,6 +230,42 @@ unstruct_visiblestring(asn_TYPE_descriptor_t *td, char *container)
 	VisibleString_t *visiblestring = (VisibleString_t *)container;
 
 	return rb_str_new(visiblestring->buf, visiblestring->size);
+}
+
+
+/******************************************************************************/
+/* BMPString															  	  */
+/******************************************************************************/
+VALUE
+unstruct_bmpstring(asn_TYPE_descriptor_t *td, char *container)
+{
+	BMPString_t *bmpstring = (BMPString_t *)container;
+
+	return rb_str_new(bmpstring->buf, bmpstring->size);
+}
+
+
+/******************************************************************************/
+/* PrintableString														  	  */
+/******************************************************************************/
+VALUE
+unstruct_printablestring(asn_TYPE_descriptor_t *td, char *container)
+{
+	PrintableString_t *printablestring = (PrintableString_t *)container;
+
+	return rb_str_new(printablestring->buf, printablestring->size);
+}
+
+
+/******************************************************************************/
+/* TeletexString														  	  */
+/******************************************************************************/
+VALUE
+unstruct_teletexstring(asn_TYPE_descriptor_t *td, char *container)
+{
+	TeletexString_t *teletexstring = (TeletexString_t *)container;
+
+	return rb_str_new(teletexstring->buf, teletexstring->size);
 }
 
 

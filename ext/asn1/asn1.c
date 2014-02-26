@@ -17,6 +17,7 @@ void Init_asn1()
 	VALUE cEncoderTypeError;
 	VALUE cInteger, cReal, cBoolean, cNull, cIA5String, cUTF8String, cNumericString;
 	VALUE cUniversalString, cVisibleString;
+	VALUE cBMPString, cISO646String, cPrintableString, cTeletexString;
 	VALUE cUndefined;
 
 	VALUE cSymbolToSchema = rb_hash_new();;
@@ -127,4 +128,28 @@ void Init_asn1()
 
 	rb_define_singleton_method(cVisibleString, "encode", encode_visiblestring, 2);
 	rb_define_singleton_method(cVisibleString, "decode", decode_visiblestring, 2);
+
+	/*
+	 * BMPString
+	 */
+	cBMPString = rb_define_class_under(cType, "BMPString", rb_cObject);
+
+	rb_define_singleton_method(cBMPString, "encode", encode_bmpstring, 2);
+	rb_define_singleton_method(cBMPString, "decode", decode_bmpstring, 2);
+
+	/*
+	 * PrintableString
+	 */
+	cPrintableString = rb_define_class_under(cType, "PrintableString", rb_cObject);
+
+	rb_define_singleton_method(cPrintableString, "encode", encode_printablestring, 2);
+	rb_define_singleton_method(cPrintableString, "decode", decode_printablestring, 2);
+
+	/*
+	 * TeletexString
+	 */
+	cTeletexString = rb_define_class_under(cType, "TeletexString", rb_cObject);
+
+	rb_define_singleton_method(cTeletexString, "encode", encode_teletexstring, 2);
+	rb_define_singleton_method(cTeletexString, "decode", decode_teletexstring, 2);
 }

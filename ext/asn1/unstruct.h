@@ -16,6 +16,9 @@ extern VALUE unstruct_utf8string(asn_TYPE_descriptor_t *td,			char *container);
 extern VALUE unstruct_numericstring(asn_TYPE_descriptor_t *td,		char *container);
 extern VALUE unstruct_universalstring(asn_TYPE_descriptor_t *td,	char *container);
 extern VALUE unstruct_visiblestring(asn_TYPE_descriptor_t *td,		char *container);
+extern VALUE unstruct_bmpstring(asn_TYPE_descriptor_t *td,			char *container);
+extern VALUE unstruct_printablestring(asn_TYPE_descriptor_t *td,	char *container);
+extern VALUE unstruct_teletexstring(asn_TYPE_descriptor_t *td,		char *container);
 
 extern VALUE unstruct_sequence(asn_TYPE_descriptor_t *td,			char *container);
 extern VALUE unstruct_sequence_of(asn_TYPE_descriptor_t *td,		char *container);

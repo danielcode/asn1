@@ -17,6 +17,9 @@ extern void *enstruct_utf8string(VALUE v,		asn_TYPE_descriptor_t *td, void *cont
 extern void *enstruct_numericstring(VALUE v,	asn_TYPE_descriptor_t *td, void *container);
 extern void *enstruct_universalstring(VALUE v,	asn_TYPE_descriptor_t *td, void *container);
 extern void *enstruct_visiblestring(VALUE v,	asn_TYPE_descriptor_t *td, void *container);
+extern void *enstruct_bmpstring(VALUE v,		asn_TYPE_descriptor_t *td, void *container);
+extern void *enstruct_printablestring(VALUE v,	asn_TYPE_descriptor_t *td, void *container);
+extern void *enstruct_teletexstring(VALUE v,	asn_TYPE_descriptor_t *td, void *container);
 extern void *enstruct_enumerated(VALUE v,		asn_TYPE_descriptor_t *td, void *container);
 extern void *enstruct_sequence(VALUE v,			asn_TYPE_descriptor_t *td, void *container);
 extern void *enstruct_sequence_of(VALUE v,		asn_TYPE_descriptor_t *td, void *container);

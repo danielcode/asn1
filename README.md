@@ -24,29 +24,29 @@ Status
 |-------------------|-----------------|-----------------------------|
 | ANY               | Not Implemented |                             |
 | BIT_STRING        | Not Implemented |                             |
-| BMPString         | Not Implemented |                             |
+| BMPString         | Implemented     | Asn1::Type::BMPString      |
 | BOOLEAN           | Implemented     | Asn1::Type::Boolean         |
 | ENUMERATED        | Implemented     | N/A                         |
-| GeneralString     | Not Implemented |                             |
+| GeneralString     | Unsupported     |                             |
 | GeneralizedTime   | Not Implemented |                             |
-| GraphicString     | Not Implemented |                             |
+| GraphicString     | Unsupported     |                             |
 | IA5String         | Implemented     | Asn1::Type::IA5String       |
 | INTEGER           | Implemented     | Asn1::Type::Integer         |
-| ISO646String      | Not Implemented |                             |
+| ISO646String      | Problematic     |                             |
 | NULL              | Implemented     | Asn1::Type::Null            |
 | NumericString     | Implemented     | Asn1::Type::NumericString   |
 | OBJECT_IDENTIFIER | Not Implemented |                             |
 | OCTET_STRING      | Not Implemented |                             |
 | ObjectDescriptor  | Not Implemented |                             |
-| PrintableString   | Not Implemented |                             |
+| PrintableString   | Implemented     | Asn1::Type::PrintableString |
 | REAL              | Not Implemented | Asn1::Type::Real            |
 | RELATIVE-OID      | Not Implemented |                             |
-| T61String         | Not Implemented |                             |
-| TeletexString     | Not Implemented |                             |
+| T61String         | Unsupported     |                             |
+| TeletexString     | Implemented     | Asn1::Type::TeletexString   |
 | UTCTime           | Not Implemented |                             |
 | UTF8String        | Implemented     | Asn1::Type::UTF8String      |
 | UniversalString   | Implemented     | Asn1::Type::UniversalString |
-| VideotexString    | Not Implemented |                             |
+| VideotexString    | Unsupported     |                             |
 | VisibleString     | Implemented     | Asn1::Type::VisibleString   |
 | CHOICE            | Implemented     | N/A                         |
 | SEQUENCE          | Implemented     | N/A                         |

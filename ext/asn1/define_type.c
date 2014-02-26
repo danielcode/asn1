@@ -426,8 +426,14 @@ get_primitive_type(int t)
 			type = rb_cFixnum;
 			break;
 
-		case ASN1_TYPE_IA5String :
-		case ASN1_TYPE_UTF8String :
+		case ASN1_TYPE_IA5String       :
+		case ASN1_TYPE_UTF8String      :
+		case ASN1_TYPE_PrintableString :
+		case ASN1_TYPE_VisibleString   :
+		case ASN1_TYPE_NumericString   :
+		case ASN1_TYPE_UniversalString :
+		case ASN1_TYPE_BMPString       :
+		case ASN1_TYPE_TeletexString   :
 			type = rb_cString;
 			break;
 
