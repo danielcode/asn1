@@ -25,6 +25,7 @@
 #include "PrintableString.h"
 #include "TeletexString.h"
 #include "GeneralizedTime.h"
+#include "BitString.h"
 #include "constr_CHOICE.h"
 #include "asn_SEQUENCE_OF.h"
 #include "ENUMERATED.h"
@@ -96,6 +97,10 @@ unstruct_object(asn_TYPE_descriptor_t *td, char *container)
 
 		case ASN1_TYPE_TeletexString :
 			v = unstruct_teletexstring(td, container);
+			break;
+
+		case ASN1_TYPE_BIT_STRING :
+			v = unstruct_bitstring(td, container);
 			break;
 
 		case ASN1_TYPE_REAL :
@@ -299,6 +304,18 @@ unstruct_generalizedtime(asn_TYPE_descriptor_t *td, char *container)
 	GeneralizedTime_t *generalizedtime = (GeneralizedTime_t *)container;
 
 	return rb_str_new(generalizedtime->buf, generalizedtime->size);
+}
+
+
+/******************************************************************************/
+/* BitString																  */
+/******************************************************************************/
+VALUE
+unstruct_bitstring(asn_TYPE_descriptor_t *td, char *container)
+{
+	BitString_t *bitstring = (BitString_t *)container;
+
+	return rb_str_new(bitstring->buf, bitstring->size);
 }
 
 

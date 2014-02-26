@@ -18,7 +18,7 @@ void Init_asn1()
 	VALUE cInteger, cReal, cBoolean, cNull, cIA5String, cUTF8String, cNumericString;
 	VALUE cUniversalString, cVisibleString;
 	VALUE cBMPString, cISO646String, cPrintableString, cTeletexString;
-	VALUE cGeneralizedTime, cOctetString;
+	VALUE cGeneralizedTime, cOctetString, cBitString;
 	VALUE cUndefined;
 
 	VALUE cSymbolToSchema = rb_hash_new();;
@@ -169,4 +169,12 @@ void Init_asn1()
 
 	rb_define_singleton_method(cTeletexString, "encode", encode_teletexstring, 2);
 	rb_define_singleton_method(cTeletexString, "decode", decode_teletexstring, 2);
+
+	/*
+	 * BitString
+	 */
+	cBitString = rb_define_class_under(cType, "BitString", rb_cObject);
+
+	rb_define_singleton_method(cBitString, "encode", encode_bitstring, 2);
+	rb_define_singleton_method(cBitString, "decode", decode_bitstring, 2);
 }

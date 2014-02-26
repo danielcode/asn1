@@ -23,7 +23,7 @@ Status
 | ASN.1 Type        | Status          | Ruby Class                  |
 |-------------------|-----------------|-----------------------------|
 | ANY               | Not Implemented |                             |
-| BIT_STRING        | Not Implemented |                             |
+| BIT_STRING        | Implemented     | Asn1::Type::BitString       |
 | BMPString         | Implemented     | Asn1::Type::BMPString       |
 | BOOLEAN           | Implemented     | Asn1::Type::Boolean         |
 | ENUMERATED        | Implemented     | N/A                         |
@@ -32,7 +32,7 @@ Status
 | GraphicString     | Unsupported     |                             |
 | IA5String         | Implemented     | Asn1::Type::IA5String       |
 | INTEGER           | Implemented     | Asn1::Type::Integer         |
-| ISO646String      | Problematic     | N/A                         |
+| ISO646String      | Problematic     |                             |
 | NULL              | Implemented     | Asn1::Type::Null            |
 | NumericString     | Implemented     | Asn1::Type::NumericString   |
 | OBJECT_IDENTIFIER | Not Implemented |                             |

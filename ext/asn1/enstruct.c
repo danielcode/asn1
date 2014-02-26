@@ -23,6 +23,7 @@
 #include "BMPString.h"
 #include "PrintableString.h"
 #include "TeletexString.h"
+#include "BitString.h"
 #include "constr_CHOICE.h"
 #include "asn_SEQUENCE_OF.h"
 
@@ -122,6 +123,10 @@ enstruct_object_to_memory(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 
 		case ASN1_TYPE_GeneralizedTime :
 			enstruct_generalizedtime(v, td, container);
+			break;
+
+		case ASN1_TYPE_BIT_STRING :
+			enstruct_bitstring(v, td, container);
 			break;
 
 		case ASN1_TYPE_REAL :
@@ -368,6 +373,17 @@ enstruct_teletexstring(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 /******************************************************************************/
 void *
 enstruct_generalizedtime(VALUE v, asn_TYPE_descriptor_t *td, void *container)
+{
+	return enstruct_ia5string(v, td, container);
+}
+
+
+/******************************************************************************/
+/* BitString															  */
+/* Note: assuming OCTET_STRING is constant length							  */
+/******************************************************************************/
+void *
+enstruct_bitstring(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 {
 	return enstruct_ia5string(v, td, container);
 }

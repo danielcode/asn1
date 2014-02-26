@@ -21,6 +21,7 @@ extern VALUE unstruct_visiblestring(asn_TYPE_descriptor_t *td,		char *container)
 extern VALUE unstruct_bmpstring(asn_TYPE_descriptor_t *td,			char *container);
 extern VALUE unstruct_printablestring(asn_TYPE_descriptor_t *td,	char *container);
 extern VALUE unstruct_teletexstring(asn_TYPE_descriptor_t *td,		char *container);
+extern VALUE unstruct_bitstring(asn_TYPE_descriptor_t *td,			char *container);
 
 extern VALUE unstruct_sequence(asn_TYPE_descriptor_t *td,			char *container);
 extern VALUE unstruct_sequence_of(asn_TYPE_descriptor_t *td,		char *container);
