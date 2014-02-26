@@ -434,6 +434,7 @@ get_primitive_type(int t)
 		case ASN1_TYPE_UniversalString :
 		case ASN1_TYPE_BMPString       :
 		case ASN1_TYPE_TeletexString   :
+		case ASN1_TYPE_GeneralizedTime :
 			type = rb_cString;
 			break;
 

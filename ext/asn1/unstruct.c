@@ -24,6 +24,7 @@
 #include "BMPString.h"
 #include "PrintableString.h"
 #include "TeletexString.h"
+#include "GeneralizedTime.h"
 #include "constr_CHOICE.h"
 #include "asn_SEQUENCE_OF.h"
 #include "ENUMERATED.h"
@@ -55,6 +56,10 @@ unstruct_object(asn_TYPE_descriptor_t *td, char *container)
 	{
 		case ASN1_TYPE_INTEGER :
 			v = unstruct_integer(td, container);
+			break;
+
+		case ASN1_TYPE_GeneralizedTime :
+			v = unstruct_generalizedtime(td, container);
 			break;
 
 		case ASN1_TYPE_IA5String :
@@ -266,6 +271,18 @@ unstruct_teletexstring(asn_TYPE_descriptor_t *td, char *container)
 	TeletexString_t *teletexstring = (TeletexString_t *)container;
 
 	return rb_str_new(teletexstring->buf, teletexstring->size);
+}
+
+
+/******************************************************************************/
+/* GeneralizedTime														  	  */
+/******************************************************************************/
+VALUE
+unstruct_generalizedtime(asn_TYPE_descriptor_t *td, char *container)
+{
+	GeneralizedTime_t *generalizedtime = (GeneralizedTime_t *)container;
+
+	return rb_str_new(generalizedtime->buf, generalizedtime->size);
 }
 
 

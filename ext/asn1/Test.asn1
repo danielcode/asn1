@@ -29,6 +29,7 @@ TestModel DEFINITIONS ::= BEGIN -- Module parameters preamble
   -- T61string        ::= T61String
   Teletexstring    ::= TeletexString
   UtcTime          ::= UTCTime
+  Generalizedtime  ::= GeneralizedTime
   Universalstring  ::= UniversalString
   -- Videotexstring   ::= VideotexString
   Visiblestring    ::= VisibleString

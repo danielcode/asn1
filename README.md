@@ -24,20 +24,20 @@ Status
 |-------------------|-----------------|-----------------------------|
 | ANY               | Not Implemented |                             |
 | BIT_STRING        | Not Implemented |                             |
-| BMPString         | Implemented     | Asn1::Type::BMPString      |
+| BMPString         | Implemented     | Asn1::Type::BMPString       |
 | BOOLEAN           | Implemented     | Asn1::Type::Boolean         |
 | ENUMERATED        | Implemented     | N/A                         |
 | GeneralString     | Unsupported     |                             |
-| GeneralizedTime   | Not Implemented |                             |
+| GeneralizedTime   | Implemented     | Asn1::Type::GeneralizedTime |
 | GraphicString     | Unsupported     |                             |
 | IA5String         | Implemented     | Asn1::Type::IA5String       |
 | INTEGER           | Implemented     | Asn1::Type::Integer         |
-| ISO646String      | Problematic     |                             |
+| ISO646String      | Problematic     | N/A                         |
 | NULL              | Implemented     | Asn1::Type::Null            |
 | NumericString     | Implemented     | Asn1::Type::NumericString   |
 | OBJECT_IDENTIFIER | Not Implemented |                             |
 | OCTET_STRING      | Not Implemented |                             |
-| ObjectDescriptor  | Not Implemented |                             |
+| ObjectDescriptor  | Unsupported     |                             |
 | PrintableString   | Implemented     | Asn1::Type::PrintableString |
 | REAL              | Not Implemented | Asn1::Type::Real            |
 | RELATIVE-OID      | Not Implemented |                             |
