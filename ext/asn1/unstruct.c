@@ -58,6 +58,10 @@ unstruct_object(asn_TYPE_descriptor_t *td, char *container)
 			v = unstruct_integer(td, container);
 			break;
 
+		case ASN1_TYPE_OCTET_STRING :
+			v = unstruct_octetstring(td, container);
+			break;
+
 		case ASN1_TYPE_GeneralizedTime :
 			v = unstruct_generalizedtime(td, container);
 			break;
@@ -175,6 +179,18 @@ VALUE
 unstruct_null(asn_TYPE_descriptor_t *td, char *container)
 {
 	return Qnil;
+}
+
+
+/******************************************************************************/
+/* OCTET STRING																  */
+/******************************************************************************/
+VALUE
+unstruct_octetstring(asn_TYPE_descriptor_t *td, char *container)
+{
+	OCTET_STRING_t *octetstring = (OCTET_STRING_t *)container;
+
+	return rb_str_new(octetstring->buf, octetstring->size);
 }
 
 

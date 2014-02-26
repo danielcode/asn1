@@ -4,6 +4,7 @@ extern VALUE decode_int(VALUE class, VALUE encoder, VALUE byte_string);
 extern VALUE decode_real(VALUE class, VALUE encoder, VALUE byte_string);
 extern VALUE decode_boolean(VALUE class, VALUE encoder, VALUE byte_string);
 extern VALUE decode_null(VALUE class, VALUE encoder, VALUE byte_string);
+extern VALUE decode_octetstring(VALUE class, VALUE encoder, VALUE byte_string);
 extern VALUE decode_generalizedtime(VALUE class, VALUE encoder, VALUE byte_string);
 extern VALUE decode_ia5string(VALUE class, VALUE encoder, VALUE byte_string);
 extern VALUE decode_utf8string(VALUE class, VALUE encoder, VALUE byte_string);

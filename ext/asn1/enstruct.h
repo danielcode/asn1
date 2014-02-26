@@ -12,6 +12,7 @@ extern void *enstruct_integer(VALUE v,			asn_TYPE_descriptor_t *td, void *contai
 extern void *enstruct_real(VALUE v,				asn_TYPE_descriptor_t *td, void *container);
 extern void *enstruct_boolean(VALUE v,			asn_TYPE_descriptor_t *td, void *container);
 extern void *enstruct_null(VALUE v,				asn_TYPE_descriptor_t *td, void *container);
+extern void *enstruct_octetstring(VALUE v,		asn_TYPE_descriptor_t *td, void *container);
 extern void *enstruct_generalizedtime(VALUE v,	asn_TYPE_descriptor_t *td, void *container);
 extern void *enstruct_ia5string(VALUE v,		asn_TYPE_descriptor_t *td, void *container);
 extern void *enstruct_utf8string(VALUE v,		asn_TYPE_descriptor_t *td, void *container);

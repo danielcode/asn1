@@ -18,7 +18,7 @@ void Init_asn1()
 	VALUE cInteger, cReal, cBoolean, cNull, cIA5String, cUTF8String, cNumericString;
 	VALUE cUniversalString, cVisibleString;
 	VALUE cBMPString, cISO646String, cPrintableString, cTeletexString;
-	VALUE cGeneralizedTime;
+	VALUE cGeneralizedTime, cOctetString;
 	VALUE cUndefined;
 
 	VALUE cSymbolToSchema = rb_hash_new();;
@@ -89,6 +89,14 @@ void Init_asn1()
 
 	rb_define_singleton_method(cNull, "encode", encode_null, 2);
 	rb_define_singleton_method(cNull, "decode", decode_null, 2);
+
+	/*
+	 * OCTET STRING
+	 */
+	cOctetString = rb_define_class_under(cType, "OctetString", rb_cObject);
+
+	rb_define_singleton_method(cOctetString, "encode", encode_octetstring, 2);
+	rb_define_singleton_method(cOctetString, "decode", decode_octetstring, 2);
 
 	/*
 	 * GeneralizedTime

@@ -36,7 +36,7 @@ Status
 | NULL              | Implemented     | Asn1::Type::Null            |
 | NumericString     | Implemented     | Asn1::Type::NumericString   |
 | OBJECT_IDENTIFIER | Not Implemented |                             |
-| OCTET_STRING      | Not Implemented |                             |
+| OCTET_STRING      | Implemented     | Asn1::Type::OctetString     |
 | ObjectDescriptor  | Unsupported     |                             |
 | PrintableString   | Implemented     | Asn1::Type::PrintableString |
 | REAL              | Not Implemented | Asn1::Type::Real            |

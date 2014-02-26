@@ -426,6 +426,7 @@ get_primitive_type(int t)
 			type = rb_cFixnum;
 			break;
 
+		case ASN1_TYPE_OCTET_STRING    :
 		case ASN1_TYPE_IA5String       :
 		case ASN1_TYPE_UTF8String      :
 		case ASN1_TYPE_PrintableString :

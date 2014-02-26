@@ -84,6 +84,10 @@ enstruct_object_to_memory(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 			enstruct_integer(v, td, container);
 			break;
 
+		case ASN1_TYPE_OCTET_STRING :
+			enstruct_octetstring(v, td, container);
+			break;
+
 		case ASN1_TYPE_IA5String :
 			enstruct_ia5string(v, td, container);
 			break;
@@ -244,11 +248,11 @@ enstruct_null(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 
 
 /******************************************************************************/
-/* IA5String																  */
+/* OCTET STRING																  */
 /* Note: assuming OCTET_STRING is constant length							  */
 /******************************************************************************/
 void *
-enstruct_ia5string(VALUE v, asn_TYPE_descriptor_t *td, void *container)
+enstruct_octetstring(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 {
     char  *str    = RSTRING_PTR(v);
 	int    length = RSTRING_LEN(v);
@@ -267,6 +271,17 @@ enstruct_ia5string(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 	memcpy(container, (void *)os, sizeof(OCTET_STRING_t));
 
 	return container;
+}
+
+
+/******************************************************************************/
+/* IA5String																  */
+/* Note: assuming OCTET_STRING is constant length							  */
+/******************************************************************************/
+void *
+enstruct_ia5string(VALUE v, asn_TYPE_descriptor_t *td, void *container)
+{
+	return enstruct_octetstring(v, td, container);
 }
 
 
