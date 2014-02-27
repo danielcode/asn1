@@ -9,4 +9,8 @@ describe "Asn1::Type::Integer" do
   it "decodes an integer" do
     Asn1::Type::Integer.decode(:xer, "<INTEGER>1</INTEGER>").should == 1
   end
+
+  it "encodes and decodes an integer" do
+    Asn1::Type::Integer.decode(:xer, Asn1::Type::Integer.encode(:xer, 1)).should == 1
+  end
 end
