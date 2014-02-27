@@ -418,12 +418,20 @@ get_primitive_type(int t)
 
 	switch(t)
 	{
+		case ASN1_TYPE_BOOLEAN :
+			type = rb_cFixnum;
+			break;
+
 		case ASN1_TYPE_NULL :
 			type = rb_cNilClass;
 			break;
 
 		case ASN1_TYPE_INTEGER :
 			type = rb_cFixnum;
+			break;
+
+		case ASN1_TYPE_REAL :
+			type = rb_cFloat;
 			break;
 
 		case ASN1_TYPE_OCTET_STRING    :
@@ -439,10 +447,6 @@ get_primitive_type(int t)
 		case ASN1_TYPE_BIT_STRING      :
 		case ASN1_TYPE_ISO646String    :
 			type = rb_cString;
-			break;
-
-		case ASN1_TYPE_REAL :
-			type = rb_cFloat;
 			break;
 
 		default :

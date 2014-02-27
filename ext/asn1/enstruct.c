@@ -228,9 +228,19 @@ enstruct_boolean(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 	{
 		*((BOOLEAN_t *)container) = 1;
 	}
+	else if (TYPE(v) == T_FIXNUM)
+	{
+		if (FIX2INT(v) == 0) {
+			*((BOOLEAN_t *)container) = 0;
+		}
+		else
+		{
+			*((BOOLEAN_t *)container) = 1;
+		}
+	}
 	else
 	{
-		rb_raise(rb_eStandardError, "Not a boolean class");
+		rb_raise(rb_eStandardError, "Can't convert to boolean");
 	}
 
 	return container;
