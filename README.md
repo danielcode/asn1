@@ -27,9 +27,9 @@ Status
 | BMPString         | Implemented     | Asn1::Type::BMPString       |
 | BOOLEAN           | Implemented     | Asn1::Type::Boolean         |
 | ENUMERATED        | Implemented     | N/A                         |
-| GeneralString     | Unsupported     |                             |
+| GeneralString     | Unsupported     | N/A                         |
 | GeneralizedTime   | Implemented     | Asn1::Type::GeneralizedTime |
-| GraphicString     | Unsupported     |                             |
+| GraphicString     | Unsupported     | N/A                         |
 | IA5String         | Implemented     | Asn1::Type::IA5String       |
 | INTEGER           | Implemented     | Asn1::Type::Integer         |
 | ISO646String      | Implemented     | Asn1::Type::ISO646String    |
@@ -41,7 +41,7 @@ Status
 | PrintableString   | Implemented     | Asn1::Type::PrintableString |
 | REAL              | Not Implemented | Asn1::Type::Real            |
 | RELATIVE-OID      | Not Implemented |                             |
-| T61String         | Unsupported     |                             |
+| T61String         | Unsupported     | N/A                         |
 | TeletexString     | Implemented     | Asn1::Type::TeletexString   |
 | UTCTime           | Not Implemented |                             |
 | UTF8String        | Implemented     | Asn1::Type::UTF8String      |
