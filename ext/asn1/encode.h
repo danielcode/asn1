@@ -15,6 +15,7 @@ extern VALUE encode_bmpstring(VALUE class, VALUE encoder, VALUE v);
 extern VALUE encode_printablestring(VALUE class, VALUE encoder, VALUE v);
 extern VALUE encode_teletexstring(VALUE class, VALUE encoder, VALUE v);
 extern VALUE encode_bitstring(VALUE class, VALUE encoder, VALUE v);
+extern VALUE encode_iso646string(VALUE class, VALUE encoder, VALUE v);
 
 extern VALUE encode_sequence(VALUE class, VALUE encoder, VALUE v);
 extern VALUE encode_sequence_of(VALUE class, VALUE encoder, VALUE v);

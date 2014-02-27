@@ -32,7 +32,7 @@ Status
 | GraphicString     | Unsupported     |                             |
 | IA5String         | Implemented     | Asn1::Type::IA5String       |
 | INTEGER           | Implemented     | Asn1::Type::Integer         |
-| ISO646String      | Problematic     |                             |
+| ISO646String      | Implemented     | Asn1::Type::ISO646String    |
 | NULL              | Implemented     | Asn1::Type::Null            |
 | NumericString     | Implemented     | Asn1::Type::NumericString   |
 | OBJECT_IDENTIFIER | Not Implemented |                             |

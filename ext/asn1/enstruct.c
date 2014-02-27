@@ -129,6 +129,10 @@ enstruct_object_to_memory(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 			enstruct_bitstring(v, td, container);
 			break;
 
+		case ASN1_TYPE_ISO646String :
+			enstruct_iso646string(v, td, container);
+			break;
+
 		case ASN1_TYPE_REAL :
 			enstruct_real(v, td, container);
 			break;
@@ -379,11 +383,22 @@ enstruct_generalizedtime(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 
 
 /******************************************************************************/
-/* BitString															  */
+/* BitString																  */
 /* Note: assuming OCTET_STRING is constant length							  */
 /******************************************************************************/
 void *
 enstruct_bitstring(VALUE v, asn_TYPE_descriptor_t *td, void *container)
+{
+	return enstruct_ia5string(v, td, container);
+}
+
+
+/******************************************************************************/
+/* ISO646String																  */
+/* Note: assuming OCTET_STRING is constant length							  */
+/******************************************************************************/
+void *
+enstruct_iso646string(VALUE v, asn_TYPE_descriptor_t *td, void *container)
 {
 	return enstruct_ia5string(v, td, container);
 }

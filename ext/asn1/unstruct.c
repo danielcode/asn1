@@ -26,6 +26,7 @@
 #include "TeletexString.h"
 #include "GeneralizedTime.h"
 #include "BitString.h"
+#include "ISO646String.h"
 #include "constr_CHOICE.h"
 #include "asn_SEQUENCE_OF.h"
 #include "ENUMERATED.h"
@@ -101,6 +102,10 @@ unstruct_object(asn_TYPE_descriptor_t *td, char *container)
 
 		case ASN1_TYPE_BIT_STRING :
 			v = unstruct_bitstring(td, container);
+			break;
+
+		case ASN1_TYPE_ISO646String :
+			v = unstruct_iso646string(td, container);
 			break;
 
 		case ASN1_TYPE_REAL :
@@ -316,6 +321,18 @@ unstruct_bitstring(asn_TYPE_descriptor_t *td, char *container)
 	BitString_t *bitstring = (BitString_t *)container;
 
 	return rb_str_new(bitstring->buf, bitstring->size);
+}
+
+
+/******************************************************************************/
+/* ISO646String																  */
+/******************************************************************************/
+VALUE
+unstruct_iso646string(asn_TYPE_descriptor_t *td, char *container)
+{
+	ISO646String_t *iso646string = (ISO646String_t *)container;
+
+	return rb_str_new(iso646string->buf, iso646string->size);
 }
 
 

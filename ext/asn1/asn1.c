@@ -177,4 +177,12 @@ void Init_asn1()
 
 	rb_define_singleton_method(cBitString, "encode", encode_bitstring, 2);
 	rb_define_singleton_method(cBitString, "decode", decode_bitstring, 2);
+
+	/*
+	 * ISO646String
+	 */
+	cISO646String = rb_define_class_under(cType, "ISO646String", rb_cObject);
+
+	rb_define_singleton_method(cISO646String, "encode", encode_iso646string, 2);
+	rb_define_singleton_method(cISO646String, "decode", decode_iso646string, 2);
 }
