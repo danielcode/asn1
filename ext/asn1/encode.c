@@ -12,11 +12,11 @@
 /******************************************************************************/
 char  *encoder_string(VALUE encoder);
 int	   consumeBytes(const void *buffer, size_t size, void *application_specific_key);
+int	   per_bytes(const void *data, size_t size, void *op_key);
 
 /******************************************************************************/
 /* Externals																  */
 /******************************************************************************/
-extern int   consumeBytes(const void *buffer, size_t size, void *application_specific_key);
 
 
 /******************************************************************************/
@@ -48,9 +48,39 @@ asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, void *object)
 		{
 			rb_raise(rb_eException, "Can't encode type");
 		}
+		/* Free memory */
 	}
 	else if (strcmp(encoder, "per") == 0)
 	{
+		size_t	bit_length;
+		size_t	bits_to_flush;
+		int		byte_length;
+
+		char *b = (char *)calloc(512, sizeof(char));
+		asn_per_outp_t apo;
+		apo.buffer        = apo.tmpspace;
+		apo.nboff         = 0;
+		apo.nbits         = 32 * 8;
+		apo.outper        = per_bytes;
+		apo.op_key        = (void *)b;
+		apo.flushed_bytes = 0;
+
+		er = td->uper_encoder(td, td->per_constraints, object, &apo);
+		if (er.encoded == -1)
+		{
+			rb_raise(rb_eException, "Can't encode type");
+			/* Free memory */
+		}
+
+		/* Relies on knowledge of internals - XXXXX - bad */
+        bits_to_flush = ((apo.buffer - apo.tmpspace) << 3) + apo.nboff;
+        bit_length	  = (apo.flushed_bytes << 3) + bits_to_flush;
+		byte_length	  = bit_length % 8 != 0 ? bit_length / 8 + 1 : bit_length / 8;
+
+		encoded = rb_str_new(b, apo.flushed_bytes);
+		rb_str_cat(encoded, apo.tmpspace, byte_length - apo.flushed_bytes);
+
+		return encoded;
 	}
 	else if (strcmp(encoder, "xer") == 0)
 	{
@@ -59,6 +89,7 @@ asn1_encode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, void *object)
 		{
 			rb_raise(rb_eException, "Can't encode type");
 		}
+		/* Free memory */
 	}
 
 	encoded = rb_str_new(bi.buffer, bi.offset);
@@ -93,18 +124,32 @@ asn1_decode_object(asn_TYPE_descriptor_t *td, VALUE encoder_v, VALUE byte_string
 		rval = td->ber_decoder(&context, td, (void **)&st, (void *)str, length, 0);
 		if (rval.code != RC_OK)
 		{
-			rb_raise(rb_eException, "Can't encode type");                                                               
+			rb_raise(rb_eException, "Can't decode type");                                                               
 		}
 	}
-	else if (strcmp(encoder, "per") == 0)                                                                             
+	else if (strcmp(encoder, "per") == 0)
 	{
+		asn_per_data_t apd;
+
+		apd.buffer		= str;
+		apd.nboff		= 0;
+		apd.nbits		= length * 8;
+		apd.moved		= 0;
+		apd.refill		= NULL;
+		apd.refill_key	= NULL;
+
+		rval = td->uper_decoder(&context, td, td->per_constraints, (void **)&st, &apd);
+		if (rval.code != RC_OK)
+		{
+			rb_raise(rb_eException, "Can't decode type");
+		}
 	}
 	else if (strcmp(encoder, "xer") == 0)                                                                             
 	{
 		rval = xer_decode(0, td, (void **)&st, str, length);
 		if (rval.code != RC_OK)
 		{
-			rb_raise(rb_eException, "Can't encode type");                                                               
+			rb_raise(rb_eException, "Can't decode type");                                                               
 		}
 	}
 
@@ -126,6 +171,7 @@ encoder_string(VALUE encoder)
 
 /******************************************************************************/
 /* consume_bytes                                                              */
+/* XXXXX - buffer check!													  */
 /******************************************************************************/
 int
 consumeBytes(const void *buffer, size_t size, void *application_specific_key)
@@ -135,6 +181,19 @@ consumeBytes(const void *buffer, size_t size, void *application_specific_key)
 	memcpy((void *)(bufferInfo->buffer + bufferInfo->offset), buffer, size);
 
 	bufferInfo->offset += size;
+
+	return 0;
+}
+
+
+/******************************************************************************/
+/* per_bytes																  */
+/* XXXXX - buffer check!													  */
+/******************************************************************************/
+int
+per_bytes(const void *data, size_t size, void *op_key)
+{
+	memcpy(op_key, data, size);
 
 	return 0;
 }
